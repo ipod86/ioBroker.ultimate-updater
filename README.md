@@ -1,11 +1,12 @@
 ![Logo](admin/ultimate-updater.png)
 # ioBroker.ultimate-updater
 
+🇩🇪 [Deutsche Version](README.de.md)
+
 [![NPM version](https://img.shields.io/npm/v/iobroker.ultimate-updater.svg)](https://www.npmjs.com/package/iobroker.ultimate-updater)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.ultimate-updater.svg)](https://www.npmjs.com/package/iobroker.ultimate-updater)
 ![Number of Installations](https://iobroker.live/badges/ultimate-updater-installed.svg)
 ![Current version in stable repository](https://iobroker.live/badges/ultimate-updater-stable.svg)
-
 [![NPM](https://nodei.co/npm/iobroker.ultimate-updater.png?downloads=true)](https://nodei.co/npm/iobroker.ultimate-updater/)
 
 **Tests:** ![Test and Release](https://github.com/ipod86/ioBroker.ultimate-updater/workflows/Test%20and%20Release/badge.svg)
