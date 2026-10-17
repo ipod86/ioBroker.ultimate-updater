@@ -45,6 +45,8 @@ class UltimateUpdater extends utils.Adapter {
 		this.unsubscribeCredential = null;
 		/** object id → JSON of the last written common (avoids rewriting objects) */
 		this.objCache = new Map();
+		/** running collective update: { stop } – null if none */
+		this.bulk = null;
 	}
 
 	/**
@@ -66,6 +68,12 @@ class UltimateUpdater extends utils.Adapter {
 		} catch (e) {
 			this.log.error(`Invalid address "${this.config.ip}:${this.config.port}": ${e.message}`);
 			return;
+		}
+
+		if (!this.config.validateCertificate && this.config.https !== false) {
+			this.log.info(
+				"The TLS certificate of the Ultimate Updater Web UI is not validated (see settings) – use this only in a trusted network.",
+			);
 		}
 
 		const sys = await this.getForeignObjectAsync("system.config");
@@ -477,7 +485,36 @@ class UltimateUpdater extends utils.Adapter {
 		});
 		await this.button("checkAll", "Check all targets incl. hosts (no update)");
 		await this.button("updateAllVmsCts", "Update all VMs/CTs (without hosts)");
-		await this.button("updateSecurityOnly", "Update VMs/CTs with security updates (without hosts)");
+		await this.button(
+			"updateSecurityOnly",
+			"Full update of the VMs/CTs that have security updates (without hosts)",
+		);
+		await this.channel("bulk", "Collective update");
+		await this.extendObject("bulk.active", {
+			type: "state",
+			common: {
+				name: "A collective update is running",
+				type: "boolean",
+				role: "indicator.working",
+				read: true,
+				write: false,
+				def: false,
+			},
+			native: {},
+		});
+		await this.extendObject("bulk.progress", {
+			type: "state",
+			common: {
+				name: "Progress of the collective update",
+				type: "string",
+				role: "text",
+				read: true,
+				write: false,
+			},
+			native: {},
+		});
+		await this.button("bulk.stop", "Stop the collective update after the current target");
+		await this.setStateChangedAsync("bulk.active", false, true);
 	}
 
 	// ── refresh / poll ───────────────────────────────────────────────────────
@@ -762,6 +799,10 @@ class UltimateUpdater extends utils.Adapter {
 	 * @param {() => Promise<any>} fn - action
 	 */
 	async action(label, fn) {
+		if (this.bulk) {
+			this.log.warn(`A collective update is running – ${label} not started.`);
+			return;
+		}
 		await this.queue(async () => {
 			try {
 				const jobs = await this.api().getJobs();
@@ -778,6 +819,127 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
+	 * Waits the given time (ends early when the adapter unloads).
+	 *
+	 * @param {number} ms - milliseconds
+	 * @returns {Promise<void>}
+	 */
+	wait(ms) {
+		return new Promise(resolve => this.setTimeout(() => resolve(), ms));
+	}
+
+	/**
+	 * Waits until no job of Ultimate Updater is running (or the given job has finished).
+	 *
+	 * @param {string} [unit] - only wait for this job
+	 * @returns {Promise<string>} final state of the job ("" when waiting for all jobs)
+	 */
+	async waitForJobs(unit) {
+		const pollMs = this.clamp(this.config.pollBusy, 2, 1) * 1000;
+		const deadline = Date.now() + 3 * 60 * 60 * 1000; // a single update should never take 3 h
+		let missing = 0;
+		while (!this.unloading) {
+			const jobs = await this.queue(() => this.api().getJobs());
+			if (unit) {
+				const job = jobs.find(j => j.unit === unit);
+				if (job && !BUSY_STATES.includes(job.state)) {
+					return String(job.state);
+				}
+				// a job that does not appear at all (anymore) counts as finished after a few polls
+				if (!job && ++missing >= 3) {
+					return "unknown";
+				}
+			} else if (!jobs.some(j => BUSY_STATES.includes(j.state))) {
+				return "";
+			}
+			if (Date.now() > deadline) {
+				throw new Error(
+					unit ? `job ${unit} did not finish within 3 hours` : "jobs did not finish within 3 hours",
+				);
+			}
+			await this.wait(pollMs);
+		}
+		throw new Error("adapter is stopping");
+	}
+
+	/**
+	 * Collective update of VMs/CTs, one target after the other: the next update is only started
+	 * when the previous job has finished (Ultimate Updater answers 202 when a job starts, not when
+	 * it ends). Hosts and excluded targets are skipped.
+	 *
+	 * @param {boolean} securityOnly - only targets that have security updates (they still get a full update)
+	 */
+	async runBulkUpdate(securityOnly) {
+		const label = securityOnly ? "Update of the VMs/CTs with security updates" : "Update of all VMs/CTs";
+		if (this.bulk) {
+			this.log.warn(`A collective update is already running – ${label} not started.`);
+			return;
+		}
+		const bulk = { stop: false };
+		this.bulk = bulk;
+		let ok = 0;
+		let failed = 0;
+		let skipped = 0;
+		try {
+			const jobs = await this.queue(() => this.api().getJobs());
+			if (jobs.some(j => BUSY_STATES.includes(j.state))) {
+				this.log.warn(`A check/update job is already running – ${label} not started.`);
+				return;
+			}
+			const status = await this.queue(() => this.api().getStatus());
+			const list = ((status && status.targets) || []).filter(
+				t => t.type !== "host" && !this.isExcluded(t) && (!securityOnly || (t.security_updates || 0) > 0),
+			);
+			this.log.info(`${label}: ${list.length} targets, one after the other (hosts and excluded targets skipped)`);
+			await this.setStateChangedAsync("bulk.active", true, true);
+
+			for (let i = 0; i < list.length; i++) {
+				const t = list[i];
+				const name = t.name || t.id;
+				if (bulk.stop || this.unloading) {
+					skipped = list.length - i;
+					this.log.info(`${label} stopped – ${skipped} targets not updated`);
+					break;
+				}
+				await this.setStateChangedAsync("bulk.progress", `${i + 1}/${list.length}: ${name}`, true);
+				// another job (e.g. started in the Web UI) must not overlap with ours
+				await this.waitForJobs();
+				let res;
+				try {
+					res = await this.queue(() => this.api().update(t.id));
+				} catch (e) {
+					failed++;
+					this.log.warn(`Update of ${name} could not be started: ${e.message}`);
+					continue;
+				}
+				this.kickPoll();
+				const unit = res && res.job ? String(res.job) : "";
+				const result = unit ? await this.waitForJobs(unit) : await this.waitForJobs();
+				if (!unit || result === "completed" || result === "completed_with_warnings" || result === "unknown") {
+					ok++;
+				} else {
+					failed++;
+				}
+				this.log.info(`Update of ${name}: ${result || "finished"} (${i + 1}/${list.length})`);
+			}
+			this.log.info(`${label} finished: ${ok} ok, ${failed} failed, ${skipped} not started`);
+		} catch (e) {
+			this.log.error(`${label} aborted: ${e.message}`);
+		} finally {
+			this.bulk = null;
+			if (!this.unloading) {
+				await this.setStateChangedAsync("bulk.active", false, true);
+				await this.setStateChangedAsync(
+					"bulk.progress",
+					`${ok} ok, ${failed} failed, ${skipped} not started`,
+					true,
+				);
+				this.kickPoll();
+			}
+		}
+	}
+
+	/**
 	 * @param {string} id - State ID
 	 * @param {ioBroker.State | null | undefined} state - State object
 	 */
@@ -787,7 +949,7 @@ class UltimateUpdater extends utils.Adapter {
 		}
 		const rel = id.slice(this.namespace.length + 1);
 		const isButton =
-			["checkAll", "updateAllVmsCts", "updateSecurityOnly"].includes(rel) ||
+			["checkAll", "updateAllVmsCts", "updateSecurityOnly", "bulk.stop"].includes(rel) ||
 			/^jobs\.[^.]+\.cancel$/.test(rel) ||
 			/^targets\.[^.]+\.(updateNow|checkNow|reboot)$/.test(rel);
 		if (!isButton) {
@@ -803,21 +965,15 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 		if (rel === "updateAllVmsCts" || rel === "updateSecurityOnly") {
-			const securityOnly = rel === "updateSecurityOnly";
-			await this.action(securityOnly ? "Security update" : "Update of all VMs/CTs", async () => {
-				const status = await this.api().getStatus();
-				const list = ((status && status.targets) || []).filter(
-					t => t.type !== "host" && !this.isExcluded(t) && (!securityOnly || (t.security_updates || 0) > 0),
-				);
-				this.log.info(`Starting update of ${list.length} VMs/CTs (hosts and excluded targets skipped)`);
-				for (const t of list) {
-					try {
-						await this.api().update(t.id);
-					} catch (e) {
-						this.log.warn(`Update of ${t.name || t.id} failed: ${e.message}`);
-					}
-				}
-			});
+			// runs in the background (can take long); progress in bulk.*
+			this.runBulkUpdate(rel === "updateSecurityOnly");
+			return;
+		}
+		if (rel === "bulk.stop") {
+			if (this.bulk) {
+				this.bulk.stop = true;
+				this.log.info("Collective update will stop after the current target");
+			}
 			return;
 		}
 		const cancel = /^jobs\.([^.]+)\.cancel$/.exec(rel);

@@ -62,12 +62,15 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 | `targets.<…>.checkNow` | Diesen Host/diese VM/diesen CT prüfen (kein Update) |
 | `targets.<…>.updateNow` | Diesen Host/diese VM/diesen CT aktualisieren (Hosts per Node-Update, Gäste werden nicht angefasst) |
 | `checkAll` | Alle Targets inklusive Hosts prüfen |
-| `updateAllVmsCts` | Alle VMs/CTs aktualisieren, Hosts ausgenommen |
-| `updateSecurityOnly` | Alle VMs/CTs mit Sicherheitsupdates aktualisieren, Hosts ausgenommen |
+| `updateAllVmsCts` | Alle VMs/CTs aktualisieren, Hosts und ausgenommene Targets werden übersprungen |
+| `updateSecurityOnly` | **Komplett**-Update der VMs/CTs, die offene Sicherheitsupdates haben; Hosts und ausgenommene Targets werden übersprungen. Der Ultimate Updater kennt kein reines Sicherheits-Update, es werden also alle offenen Updates dieser Targets installiert. |
+| `bulk.stop` | Laufendes Sammel-Update nach dem aktuellen Target beenden |
 | `targets.<…>.reboot` | Diesen Host/diese VM/diesen CT neu starten – nur vorhanden, wenn Neustart-Buttons erlaubt sind und das Target einen Neustart braucht |
 | `jobs.<Unit>.cancel` | Diesen Job abbrechen – nur vorhanden, solange der Job läuft |
 
 Es wird nie automatisch aktualisiert oder neu gestartet – nur per Knopfdruck. Solange ein Job läuft, werden weitere Aktionen abgelehnt.
+
+**Sammel-Updates laufen nacheinander:** Der Ultimate Updater antwortet, sobald ein Job *gestartet* ist (HTTP 202). Der Adapter wartet deshalb, bis der Job eines Targets beendet ist, bevor er das nächste startet. Auch auf anderswo gestartete Jobs (z. B. in der Web-UI) wird gewartet. Den Fortschritt zeigen `bulk.active` und `bulk.progress` (z. B. `3/7: web`, am Ende `6 ok, 1 failed, 0 not started`).
 
 ### Benachrichtigungen
 
@@ -78,6 +81,16 @@ Der Adapter nutzt den ioBroker Notification Manager; Telegram, E-Mail, Pushover 
 - **Job fehlgeschlagen** – ein Prüf-/Update-/Neustart-Job ist fehlgeschlagen oder wurde abgebrochen (auch Jobs, die fehlschlugen, während der Adapter gestoppt war)
 
 Beim allerersten Start wird nichts gemeldet; der aktuelle Stand wird nur erfasst.
+
+### Sicherheit
+
+Bitte beachte, was der aktuelle Web-UI-Login bedeutet:
+
+- Der Ultimate Updater akzeptiert nur Proxmox-Konten mit **vollen Administrator-Rechten auf `/`** (ohne 2FA). Diese Zugangsdaten liegen in ioBroker (verschlüsselt mit dem ioBroker-System-Secret oder im zentralen Credentials-Manager). Wer Zugriff auf den ioBroker-Admin oder dessen Objektdatenbank hat, kann dieses Konto praktisch mitnutzen.
+- Der Adapter **prüft das TLS-Zertifikat standardmäßig nicht**, weil die Web-UI normalerweise das selbstsignierte Proxmox-Zertifikat verwendet. Die Verbindung ist dann zwar verschlüsselt, ein Angreifer im eigenen Netz könnte den Login aber abfangen (Man-in-the-Middle). Aktiviere *TLS-Zertifikat validieren*, wenn die Web-UI ein vertrauenswürdiges Zertifikat nutzt, und betreibe den Adapter nur in einem vertrauenswürdigen Netz.
+- Beschränke den Zugriff auf den Port der Ultimate-Updater-Web-UI auf die Systeme, die ihn brauchen (z. B. per Firewall).
+
+Eine eigene Token-API mit getrennten Rechten (lesen / prüfen / aktualisieren / neu starten) wird upstream besprochen; der Adapter nutzt sie, sobald es sie gibt.
 
 ### Hinweis zur API
 
@@ -91,6 +104,8 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 
 ### **WORK IN PROGRESS**
 * (ipod86) Erste Version
+* (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
+* (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README
 
 Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

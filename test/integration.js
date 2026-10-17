@@ -91,12 +91,44 @@ tests.integration(path.join(__dirname, ".."), {
 				expect(mock.state.actions).to.deep.include(["reboot", "host:pve"]);
 			});
 
-			it("skips excluded targets when updating all VMs/CTs", async () => {
+			it("updates all VMs/CTs one after the other and skips excluded targets", async function () {
+				this.timeout(30000);
 				mock.state.actions.length = 0;
+				mock.state.timeline.length = 0;
+				mock.state.autoCompleteMs = 2500;
+				mock.state.targets.push({
+					id: "lxc:104",
+					name: "mail",
+					type: "lxc",
+					node: "pve",
+					reachable: true,
+					security_updates: 0,
+					normal_updates: 3,
+					reboot_required: false,
+				});
 				await harness.states.setStateAsync(`${NS}.updateAllVmsCts`, true, false);
 				await wait(1500);
-				expect(mock.state.actions).to.deep.include(["update", "lxc:101"]);
-				expect(mock.state.actions).to.not.deep.include(["update", "lxc:103"]);
+				const active = await harness.states.getStateAsync(`${NS}.bulk.active`);
+				expect(active && active.val).to.equal(true);
+				// only the first target has been started while its job is still running
+				expect(mock.state.actions.filter(a => a[0] === "update").map(a => a[1])).to.deep.equal(["lxc:101"]);
+				// a single update is refused while the collective update runs
+				await harness.states.setStateAsync(`${NS}.targets.pve_host_pve.updateNow`, true, false);
+				await wait(9000);
+				const started = mock.state.actions.filter(a => a[0] === "update" || a[0] === "update-node").map(a => a[1]);
+				expect(started).to.deep.equal(["lxc:101", "lxc:104"]);
+				expect(started).to.not.include("lxc:103");
+				// the second job started only after the first one had finished
+				const doneFirst = mock.state.timeline.find(e => e[0] === "done" && e[1] === "lxc:101");
+				const startSecond = mock.state.timeline.find(e => e[0] === "start" && e[1] === "lxc:104");
+				expect(startSecond[2]).to.be.at.least(doneFirst[2]);
+				await wait(3000);
+				const after = await harness.states.getStateAsync(`${NS}.bulk.active`);
+				expect(after && after.val).to.equal(false);
+				const progress = await harness.states.getStateAsync(`${NS}.bulk.progress`);
+				expect(progress && progress.val).to.equal("2 ok, 0 failed, 0 not started");
+				mock.state.autoCompleteMs = 0;
+				mock.state.targets = mock.state.targets.filter(t => t.id !== "lxc:104");
 			});
 
 			it("shows a running job at the target and cancels it", async function () {

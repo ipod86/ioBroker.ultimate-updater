@@ -13,7 +13,7 @@ const http = require("node:http");
  * @returns {Promise<{server: http.Server, state: any, port: number}>} running mock
  */
 function startMock() {
-	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean}} */
+	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean, autoCompleteMs: number, timeline: any[]}} */
 	const state = {
 		sessions: new Map(),
 		logins: 0,
@@ -26,6 +26,9 @@ function startMock() {
 		],
 		jobs: [{ unit: "uu-1", target: "lxc:102", state: "failed", exit_code: 1 }],
 		startJobOnUpdate: false,
+		autoCompleteMs: 0,
+		/** @type {any[]} */
+		timeline: [],
 	};
 	const server = http.createServer((req, res) => {
 		let body = "";
@@ -100,6 +103,22 @@ function startMock() {
 				const m = /^\/api\/(update|check|update-node|check-node)\/(.+)$/.exec(req.url || "");
 				if (m) {
 					state.actions.push([m[1], decodeURIComponent(m[2])]);
+					if (state.autoCompleteMs > 0 && m[1] === "update") {
+						// realistic job: running for a while, then completed
+						const job = {
+							unit: `uu-${decodeURIComponent(m[2]).replace(/[^a-z0-9]/gi, "")}-${state.actions.length}`,
+							target: decodeURIComponent(m[2]),
+							state: "running",
+							started_at: new Date().toISOString(),
+						};
+						state.jobs.push(job);
+						state.timeline.push(["start", job.target, Date.now()]);
+						setTimeout(() => {
+							job.state = "completed";
+							state.timeline.push(["done", job.target, Date.now()]);
+						}, state.autoCompleteMs);
+						return send(202, { target: job.target, job: job.unit, state: "running" });
+					}
 					if (state.startJobOnUpdate && m[1] === "update") {
 						state.jobs.push({
 							unit: "uu-2",

@@ -62,12 +62,15 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 | `targets.<…>.checkNow` | Check this host/VM/CT (no update) |
 | `targets.<…>.updateNow` | Update this host/VM/CT (hosts via node update, guests are not touched) |
 | `checkAll` | Check all targets including hosts |
-| `updateAllVmsCts` | Update all VMs/CTs, hosts excluded |
-| `updateSecurityOnly` | Update all VMs/CTs that have security updates, hosts excluded |
+| `updateAllVmsCts` | Update all VMs/CTs, hosts and excluded targets skipped |
+| `updateSecurityOnly` | **Full** update of the VMs/CTs that have pending security updates, hosts and excluded targets skipped. Ultimate Updater has no security-only update, so all pending updates of these targets are installed. |
+| `bulk.stop` | Stop a running collective update after the current target |
 | `targets.<…>.reboot` | Reboot this host/VM/CT – only exists if reboot buttons are allowed and the target needs a reboot |
 | `jobs.<unit>.cancel` | Cancel this job – only exists while the job is running |
 
 Nothing is ever updated or rebooted automatically – only when you press a button. While a job is running, further actions are refused.
+
+**Collective updates run one target after the other:** Ultimate Updater answers as soon as a job has *started* (HTTP 202), so the adapter waits until the job of one target has finished before it starts the next one. Jobs started elsewhere (e.g. in the Web UI) are waited for as well. Progress is shown in `bulk.active` and `bulk.progress` (e.g. `3/7: web`, at the end `6 ok, 1 failed, 0 not started`).
 
 ### Notifications
 
@@ -78,6 +81,16 @@ The adapter uses the ioBroker notification manager, so Telegram, e-mail, Pushove
 - **Job failed** – a check/update/reboot job failed or was interrupted (also jobs that failed while the adapter was stopped)
 
 On the very first start nothing is notified; the current state is only recorded.
+
+### Security
+
+Please be aware of what the current Web UI login means:
+
+- Ultimate Updater only accepts Proxmox accounts with **full Administrator privileges at `/`** (no 2FA). These credentials are stored in ioBroker (encrypted with the ioBroker system secret, or in the central credentials manager). Anyone with access to the ioBroker admin or its object database can effectively use this account.
+- The adapter does **not validate the TLS certificate** by default, because the Web UI normally uses the self-signed Proxmox certificate. Without validation the connection is encrypted, but a man-in-the-middle in your network could intercept the login. Enable *Validate TLS certificate* if the Web UI uses a trusted certificate, and run the adapter only in a trusted network.
+- Restrict access to the Ultimate Updater Web UI port to the hosts that need it (e.g. firewall rules).
+
+A dedicated token API with separate permissions (read / check / update / reboot) is being discussed upstream; the adapter will use it as soon as it exists.
 
 ### Note on the API
 
@@ -91,6 +104,8 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 
 ### **WORK IN PROGRESS**
 * (ipod86) initial release
+* (ipod86) collective updates run one target after the other (waiting for each job), progress in `bulk.*`
+* (ipod86) clearer description of the security update button; security notes in the README
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
