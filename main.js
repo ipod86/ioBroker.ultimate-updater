@@ -880,6 +880,7 @@ class UltimateUpdater extends utils.Adapter {
 		let ok = 0;
 		let failed = 0;
 		let skipped = 0;
+		let stoppedSkipped = 0;
 		try {
 			const jobs = await this.queue(() => this.api().getJobs());
 			if (jobs.some(j => BUSY_STATES.includes(j.state))) {
@@ -887,10 +888,17 @@ class UltimateUpdater extends utils.Adapter {
 				return;
 			}
 			const status = await this.queue(() => this.api().getStatus());
-			const list = ((status && status.targets) || []).filter(
+			const candidates = ((status && status.targets) || []).filter(
 				t => t.type !== "host" && !this.isExcluded(t) && (!securityOnly || (t.security_updates || 0) > 0),
 			);
-			this.log.info(`${label}: ${list.length} targets, one after the other (hosts and excluded targets skipped)`);
+			// "running" (default): shut down VMs/CTs are skipped – Ultimate Updater only updates them
+			// if STOPPED_CONTAINER/STOPPED_VM is enabled in its update.conf, otherwise the job fails
+			const onlyRunning = this.config.bulkTargets !== "all";
+			const list = onlyRunning ? candidates.filter(t => t.status !== "stopped") : candidates;
+			stoppedSkipped = candidates.length - list.length;
+			this.log.info(
+				`${label}: ${list.length} targets, one after the other (hosts and excluded targets skipped${stoppedSkipped ? `, ${stoppedSkipped} shut down VMs/CTs skipped` : ""})`,
+			);
 			await this.setStateChangedAsync("bulk.active", true, true);
 
 			for (let i = 0; i < list.length; i++) {
@@ -922,7 +930,9 @@ class UltimateUpdater extends utils.Adapter {
 				}
 				this.log.info(`Update of ${name}: ${result || "finished"} (${i + 1}/${list.length})`);
 			}
-			this.log.info(`${label} finished: ${ok} ok, ${failed} failed, ${skipped} not started`);
+			this.log.info(
+				`${label} finished: ${ok} ok, ${failed} failed, ${skipped} not started${stoppedSkipped ? `, ${stoppedSkipped} shut down skipped` : ""}`,
+			);
 		} catch (e) {
 			this.log.error(`${label} aborted: ${e.message}`);
 		} finally {
@@ -931,7 +941,7 @@ class UltimateUpdater extends utils.Adapter {
 				await this.setStateChangedAsync("bulk.active", false, true);
 				await this.setStateChangedAsync(
 					"bulk.progress",
-					`${ok} ok, ${failed} failed, ${skipped} not started`,
+					`${ok} ok, ${failed} failed, ${skipped} not started${stoppedSkipped ? `, ${stoppedSkipped} shut down skipped` : ""}`,
 					true,
 				);
 				this.kickPoll();

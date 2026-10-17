@@ -38,6 +38,7 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 | Vollständige Statusaktualisierung | Intervall zum Lesen aller Targets (Minuten, Standard 60). Nach einem beendeten Job wird der Status sofort aktualisiert. |
 | Job-Abfrageintervall | Wie oft die Jobliste geprüft wird: im Leerlauf (Standard 30 s) und während ein Job läuft (Standard 2 s) |
 | Ausgenommen von „Alle aktualisieren“ | VMs/CTs, die die Sammel-Update-Buttons überspringen (z. B. der ioBroker-Container selbst). Einzeln lassen sie sich weiterhin aktualisieren. Die Liste wird von der laufenden Instanz geladen. |
+| Sammel-Updates umfassen | **Nur laufende VMs/CTs** (Standard) oder **alle VMs/CTs**. „Alle“ funktioniert nur, wenn im Ultimate Updater das Aktualisieren gestoppter Gäste ebenfalls aktiviert ist (`STOPPED_CONTAINER` / `STOPPED_VM` in dessen `update.conf`): Er startet sie dann für das Update und fährt sie danach wieder herunter. Sonst überspringt der Ultimate Updater sie und ihre Jobs schlagen fehl. |
 | Neustart-Buttons erlauben | Legt für Hosts/VMs/CTs, die einen Neustart brauchen, einen `reboot`-Button an. Standardmäßig aus. |
 | Nicht mehr vorhandene Targets löschen | Entfernt die Datenpunkte von Hosts/VMs/CTs, die der Ultimate Updater nicht mehr meldet (z. B. in Proxmox gelöscht). Standardmäßig an; ist die Option aus, bleiben sie erhalten. |
 | Benachrichtigungen | Neue Sicherheitsupdates, Neustart erforderlich, Job fehlgeschlagen/abgebrochen – jeweils einzeln abschaltbar |
@@ -106,6 +107,7 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 * (ipod86) Erste Version
 * (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
 * (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README
+* (ipod86) Einstellung, ob Sammel-Updates auch ausgeschaltete VMs/CTs umfassen (Standard: nur laufende)
 
 Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

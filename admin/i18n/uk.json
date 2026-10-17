@@ -32,5 +32,9 @@
 	"From the credentials manager (admin settings)": "З менеджера облікових даних (налаштування admin)",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "Менеджеру облікових даних потрібні admin 7.9 і js-controller 7.2.2 або новіші",
 	"Proxmox login": "Вхід у Proxmox",
-	"A \"Login & password\" credential, e.g. root@pam": "Облікові дані типу «Логін і пароль», напр. root@pam"
+	"A \"Login & password\" credential, e.g. root@pam": "Облікові дані типу «Логін і пароль», напр. root@pam",
+	"Collective updates include": "Масові оновлення охоплюють",
+	"Only running VMs/CTs": "Лише запущені ВМ/контейнери",
+	"All VMs/CTs (also shut down ones)": "Усі ВМ/контейнери (також вимкнені)",
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "«Усі» працює лише якщо в Ultimate Updater також увімкнено оновлення зупинених гостей (STOPPED_CONTAINER / STOPPED_VM в update.conf) – тоді він запускає їх для оновлення і потім знову вимикає. Інакше Ultimate Updater пропускає їх, і завдання завершується з помилкою."
 }

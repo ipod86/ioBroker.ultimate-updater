@@ -32,5 +32,9 @@
 	"From the credentials manager (admin settings)": "Aus dem Credentials-Manager (Admin-Einstellungen)",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "Der Credentials-Manager benötigt Admin 7.9 und js-controller 7.2.2 oder neuer",
 	"Proxmox login": "Proxmox-Login",
-	"A \"Login & password\" credential, e.g. root@pam": "Ein Eintrag vom Typ „Login & Passwort“, z. B. root@pam"
+	"A \"Login & password\" credential, e.g. root@pam": "Ein Eintrag vom Typ „Login & Passwort“, z. B. root@pam",
+	"Collective updates include": "Sammel-Updates umfassen",
+	"Only running VMs/CTs": "Nur laufende VMs/CTs",
+	"All VMs/CTs (also shut down ones)": "Alle VMs/CTs (auch ausgeschaltete)",
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "„Alle“ funktioniert nur, wenn im Ultimate Updater das Aktualisieren gestoppter Gäste ebenfalls aktiviert ist (STOPPED_CONTAINER / STOPPED_VM in der update.conf) – er startet sie dann für das Update und fährt sie danach wieder herunter. Sonst überspringt der Ultimate Updater sie und der Job schlägt fehl."
 }

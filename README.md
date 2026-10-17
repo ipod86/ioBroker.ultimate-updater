@@ -38,6 +38,7 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 | Full status refresh | Interval for reading all targets (minutes, default 60). After a job has finished the status is refreshed immediately. |
 | Job poll interval | How often the job list is checked: when idle (default 30 s) and while a job is running (default 2 s) |
 | Excluded from "update all" | VMs/CTs that the collective update buttons skip (e.g. the ioBroker container itself). They can still be updated individually. The list is loaded from the running instance. |
+| Collective updates include | **Only running VMs/CTs** (default) or **all VMs/CTs**. "All" only works if updating stopped guests is enabled in Ultimate Updater as well (`STOPPED_CONTAINER` / `STOPPED_VM` in its `update.conf`): it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and their jobs fail. |
 | Allow reboot buttons | Creates a `reboot` button for hosts/VMs/CTs that need a reboot. Off by default. |
 | Delete targets that no longer exist | Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). On by default; if off, they are kept. |
 | Notifications | New security updates, reboot required, job failed/interrupted – each can be switched off |
@@ -106,6 +107,7 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 * (ipod86) initial release
 * (ipod86) collective updates run one target after the other (waiting for each job), progress in `bulk.*`
 * (ipod86) clearer description of the security update button; security notes in the README
+* (ipod86) setting whether collective updates include shut down VMs/CTs (default: only running ones)
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

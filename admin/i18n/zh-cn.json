@@ -32,5 +32,9 @@
 	"From the credentials manager (admin settings)": "来自凭据管理器（admin 设置）",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "凭据管理器需要 admin 7.9 和 js-controller 7.2.2 或更高版本",
 	"Proxmox login": "Proxmox 登录",
-	"A \"Login & password\" credential, e.g. root@pam": "“登录名和密码”类型的凭据，例如 root@pam"
+	"A \"Login & password\" credential, e.g. root@pam": "“登录名和密码”类型的凭据，例如 root@pam",
+	"Collective updates include": "批量更新包括",
+	"Only running VMs/CTs": "仅正在运行的虚拟机/容器",
+	"All VMs/CTs (also shut down ones)": "所有虚拟机/容器（包括已关闭的）",
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "只有在 Ultimate Updater 中也启用了更新已停止客户机（update.conf 中的 STOPPED_CONTAINER / STOPPED_VM）时，“全部”才有效——它会为更新启动它们，然后再次关闭。否则 Ultimate Updater 会跳过它们，任务失败。"
 }

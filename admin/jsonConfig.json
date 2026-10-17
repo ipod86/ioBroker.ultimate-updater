@@ -183,6 +183,27 @@
 			"lg": 8,
 			"xl": 8
 		},
+		"bulkTargets": {
+			"type": "select",
+			"label": "Collective updates include",
+			"options": [
+				{
+					"label": "Only running VMs/CTs",
+					"value": "running"
+				},
+				{
+					"label": "All VMs/CTs (also shut down ones)",
+					"value": "all"
+				}
+			],
+			"help": "\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 8,
+			"xl": 8
+		},
 		"allowReboot": {
 			"type": "checkbox",
 			"label": "Allow reboot buttons",

@@ -106,6 +106,18 @@ tests.integration(path.join(__dirname, ".."), {
 					normal_updates: 3,
 					reboot_required: false,
 				});
+				// shut down CT: skipped by default (setting "only running VMs/CTs")
+				mock.state.targets.push({
+					id: "lxc:105",
+					name: "backup",
+					type: "lxc",
+					node: "pve",
+					status: "stopped",
+					reachable: null,
+					security_updates: null,
+					normal_updates: null,
+					reboot_required: null,
+				});
 				await harness.states.setStateAsync(`${NS}.updateAllVmsCts`, true, false);
 				await wait(1500);
 				const active = await harness.states.getStateAsync(`${NS}.bulk.active`);
@@ -118,6 +130,7 @@ tests.integration(path.join(__dirname, ".."), {
 				const started = mock.state.actions.filter(a => a[0] === "update" || a[0] === "update-node").map(a => a[1]);
 				expect(started).to.deep.equal(["lxc:101", "lxc:104"]);
 				expect(started).to.not.include("lxc:103");
+				expect(started).to.not.include("lxc:105");
 				// the second job started only after the first one had finished
 				const doneFirst = mock.state.timeline.find(e => e[0] === "done" && e[1] === "lxc:101");
 				const startSecond = mock.state.timeline.find(e => e[0] === "start" && e[1] === "lxc:104");
@@ -126,9 +139,9 @@ tests.integration(path.join(__dirname, ".."), {
 				const after = await harness.states.getStateAsync(`${NS}.bulk.active`);
 				expect(after && after.val).to.equal(false);
 				const progress = await harness.states.getStateAsync(`${NS}.bulk.progress`);
-				expect(progress && progress.val).to.equal("2 ok, 0 failed, 0 not started");
+				expect(progress && progress.val).to.equal("2 ok, 0 failed, 0 not started, 1 shut down skipped");
 				mock.state.autoCompleteMs = 0;
-				mock.state.targets = mock.state.targets.filter(t => t.id !== "lxc:104");
+				mock.state.targets = mock.state.targets.filter(t => t.id !== "lxc:104" && t.id !== "lxc:105");
 			});
 
 			it("shows a running job at the target and cancels it", async function () {

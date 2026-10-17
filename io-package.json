@@ -100,6 +100,7 @@
 		"pollBusy": 2,
 		"deleteStaleTargets": true,
 		"excludeTargets": [],
+		"bulkTargets": "running",
 		"allowReboot": false,
 		"notifySecurity": true,
 		"notifyReboot": true,
