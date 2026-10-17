@@ -112,12 +112,28 @@ tests.integration(path.join(__dirname, ".."), {
 
 				// target deleted in Proxmox meanwhile → removed on the refresh after the job ended
 				mock.state.targets = mock.state.targets.filter(t => t.id !== "lxc:103");
+				// unknown value for a number field must not change the state type
+				mock.state.targets.find(t => t.id === "lxc:101").security_updates = null;
 				await harness.states.setStateAsync(`${NS}.jobs.uu_2.cancel`, true, false);
 				await wait(4000);
 				expect(mock.state.actions).to.deep.include(["cancel", "uu-2"]);
 				const after = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.jobState`);
 				expect(after && after.val).to.equal("interrupted");
 				expect(await harness.objects.getObjectAsync(`${NS}.jobs.uu_2.cancel`)).to.not.be.ok;
+			});
+
+			it("keeps the state type when the API delivers null", async () => {
+				const obj = await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.security_updates`);
+				expect(obj && obj.common.type).to.equal("number");
+				const st = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.security_updates`);
+				expect(st && st.val).to.equal(null);
+			});
+
+			it("does not touch user writes to non-button states", async () => {
+				await harness.states.setStateAsync(`${NS}.targets.web_lxc_101.name`, "manual", false);
+				await wait(500);
+				const st = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.name`);
+				expect(st && st.val).to.equal("manual");
 			});
 
 			it("notifies the interrupted job once and removes the deleted target", async () => {

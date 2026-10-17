@@ -40,6 +40,8 @@ class UltimateUpdater extends utils.Adapter {
 		/** last notified state (null = first run) */
 		this.notified = null;
 		this.notifiedJobsInitialised = false;
+		/** object id → JSON of the last written common (avoids rewriting objects) */
+		this.objCache = new Map();
 	}
 
 	/**
@@ -69,6 +71,8 @@ class UltimateUpdater extends utils.Adapter {
 		} catch {
 			this.notified = null;
 		}
+		// with a persisted state, failures that happened while the adapter was stopped are new and get notified
+		this.notifiedJobsInitialised = !!this.notified;
 		this.subscribeStates("*");
 
 		await this.refreshStatus();
@@ -142,7 +146,38 @@ class UltimateUpdater extends utils.Adapter {
 	 * @param {string} name - name
 	 */
 	async channel(id, name) {
-		await this.extendObject(id, { type: "channel", common: { name }, native: {} });
+		await this.ensureObject(id, "channel", { name });
+	}
+
+	/**
+	 * Creates/updates an object only when it is new or its common part changed.
+	 *
+	 * @param {string} id - object id
+	 * @param {"state" | "channel" | "device" | "folder"} type - object type
+	 * @param {Record<string, any>} common - common part
+	 */
+	async ensureObject(id, type, common) {
+		const sig = `${type}|${JSON.stringify(common)}`;
+		if (this.objCache.get(id) === sig) {
+			return;
+		}
+		await this.extendObject(id, { type, common, native: {} });
+		this.objCache.set(id, sig);
+	}
+
+	/**
+	 * Deletes an object (recursively) and forgets it in the cache.
+	 *
+	 * @param {string} id - object id
+	 * @param {boolean} [recursive] - delete children too
+	 */
+	async removeObject(id, recursive = false) {
+		await this.delObjectAsync(id, recursive ? { recursive: true } : undefined);
+		for (const key of [...this.objCache.keys()]) {
+			if (key === id || (recursive && key.startsWith(`${id}.`))) {
+				this.objCache.delete(key);
+			}
+		}
 	}
 
 	/**
@@ -175,14 +210,25 @@ class UltimateUpdater extends utils.Adapter {
 	 * @param {Partial<ioBroker.StateCommon>} [common] - common overrides
 	 */
 	async value(id, name, val, common = {}) {
+		if (val === null || val === undefined) {
+			// unknown value: keep type/role of an existing state, create new ones as text
+			if (!this.objCache.has(id) && !(await this.getObjectAsync(id))) {
+				await this.ensureObject(id, "state", {
+					name,
+					type: "string",
+					role: "text",
+					read: true,
+					write: false,
+					...common,
+				});
+			}
+			await this.setStateChangedAsync(id, null, true);
+			return;
+		}
 		const type = typeof val === "boolean" ? "boolean" : typeof val === "number" ? "number" : "string";
 		const role = this.roleFor(String(id.split(".").pop()), type, val);
-		await this.extendObject(id, {
-			type: "state",
-			common: { name, type, role, read: true, write: false, ...common },
-			native: {},
-		});
-		await this.setStateChangedAsync(id, val === undefined ? null : val, true);
+		await this.ensureObject(id, "state", { name, type, role, read: true, write: false, ...common });
+		await this.setStateChangedAsync(id, val, true);
 	}
 
 	/**
@@ -190,10 +236,13 @@ class UltimateUpdater extends utils.Adapter {
 	 * @param {string} name - name
 	 */
 	async button(id, name) {
-		await this.extendObject(id, {
-			type: "state",
-			common: { name, type: "boolean", role: "button", read: false, write: true, def: false },
-			native: {},
+		await this.ensureObject(id, "state", {
+			name,
+			type: "boolean",
+			role: "button",
+			read: false,
+			write: true,
+			def: false,
 		});
 	}
 
@@ -325,8 +374,8 @@ class UltimateUpdater extends utils.Adapter {
 
 	async createStaticObjects() {
 		await this.channel("summary", "Summary");
-		await this.extendObject("jobs", { type: "folder", common: { name: "Jobs" }, native: {} });
-		await this.extendObject("targets", { type: "folder", common: { name: "Targets" }, native: {} });
+		await this.ensureObject("jobs", "folder", { name: "Jobs" });
+		await this.ensureObject("targets", "folder", { name: "Targets" });
 		await this.extendObject("jobRunning", {
 			type: "state",
 			common: {
@@ -368,6 +417,11 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	schedulePoll() {
+		if (this.pollTimer) {
+			// only one poll chain may exist (an in-flight poll and kickPoll both end up here)
+			this.clearTimeout(this.pollTimer);
+			this.pollTimer = null;
+		}
 		if (this.unloading) {
 			return;
 		}
@@ -396,6 +450,9 @@ class UltimateUpdater extends utils.Adapter {
 			await this.queue(() => this.refreshJobs());
 			await this.setState("info.connection", true, true);
 		} catch (e) {
+			if (this.unloading) {
+				return;
+			}
 			this.log.warn(`Job status check failed: ${e.message}`);
 			await this.setState("info.connection", false, true);
 			return;
@@ -424,8 +481,8 @@ class UltimateUpdater extends utils.Adapter {
 			await this.flatten(prefix, j);
 			if (BUSY_STATES.includes(j.state)) {
 				await this.button(`${prefix}.cancel`, "Cancel this job");
-			} else if (await this.getObjectAsync(`${prefix}.cancel`)) {
-				await this.delObjectAsync(`${prefix}.cancel`);
+			} else if (this.objCache.has(`${prefix}.cancel`) || (await this.getObjectAsync(`${prefix}.cancel`))) {
+				await this.removeObject(`${prefix}.cancel`);
 			}
 			if (FAILURE_STATES.includes(j.state)) {
 				const logState = await this.getStateAsync(`${prefix}.log`);
@@ -448,7 +505,7 @@ class UltimateUpdater extends utils.Adapter {
 			const parts = chId.split(".");
 			const key = parts[3];
 			if (parts.length === 4 && !seen.has(key)) {
-				await this.delObjectAsync(`jobs.${key}`, { recursive: true });
+				await this.removeObject(`jobs.${key}`, true);
 			}
 		}
 	}
@@ -497,6 +554,9 @@ class UltimateUpdater extends utils.Adapter {
 				await this.setState("info.connection", true, true);
 				this.log.debug(`Status refreshed: ${targets.length} targets`);
 			} catch (e) {
+				if (this.unloading) {
+					return;
+				}
 				this.log.error(`Status refresh failed: ${e.message}`);
 				await this.setState("info.connection", false, true);
 			}
@@ -585,11 +645,7 @@ class UltimateUpdater extends utils.Adapter {
 			current.set(key, t);
 			const prefix = `targets.${key}`;
 			const isHost = t.type === "host";
-			await this.extendObject(prefix, {
-				type: "device",
-				common: { name: `${t.name || t.id} (${t.type})` },
-				native: {},
-			});
+			await this.ensureObject(prefix, "device", { name: `${t.name || t.id} (${t.type})` });
 			await this.flatten(prefix, t);
 			await this.button(`${prefix}.updateNow`, isHost ? "Update this host" : "Update this VM/CT");
 			await this.button(
@@ -599,8 +655,8 @@ class UltimateUpdater extends utils.Adapter {
 			// reboot button only if allowed in the settings and the target actually needs a reboot
 			if (this.config.allowReboot && t.reboot_required === true && ["host", "lxc", "vm"].includes(t.type)) {
 				await this.button(`${prefix}.reboot`, isHost ? "Reboot this host" : "Reboot this VM/CT");
-			} else if (await this.getObjectAsync(`${prefix}.reboot`)) {
-				await this.delObjectAsync(`${prefix}.reboot`);
+			} else if (this.objCache.has(`${prefix}.reboot`) || (await this.getObjectAsync(`${prefix}.reboot`))) {
+				await this.removeObject(`${prefix}.reboot`);
 			}
 		}
 		// remove targets that the API no longer delivers (deleted VM/CT) – only if enabled in the settings
@@ -609,7 +665,7 @@ class UltimateUpdater extends utils.Adapter {
 			const parts = devId.split(".");
 			if (parts.length === 4 && !current.has(parts[3])) {
 				if (this.config.deleteStaleTargets !== false) {
-					await this.delObjectAsync(`targets.${parts[3]}`, { recursive: true });
+					await this.removeObject(`targets.${parts[3]}`, true);
 					this.log.info(`Target no longer delivered, removed: ${parts[3]}`);
 				} else {
 					this.log.debug(`Target no longer delivered, kept (deletion disabled): ${parts[3]}`);
@@ -653,6 +709,13 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 		const rel = id.slice(this.namespace.length + 1);
+		const isButton =
+			["checkAll", "updateAllVmsCts", "updateSecurityOnly"].includes(rel) ||
+			/^jobs\.[^.]+\.cancel$/.test(rel) ||
+			/^targets\.[^.]+\.(updateNow|checkNow|reboot)$/.test(rel);
+		if (!isButton) {
+			return;
+		}
 		await this.setState(rel, false, true);
 
 		if (rel === "checkAll") {
@@ -770,10 +833,10 @@ class UltimateUpdater extends utils.Adapter {
 			const client = this.client;
 			this.client = null;
 			if (client) {
-				client.logout().finally(() => callback());
-			} else {
-				callback();
+				// best effort, do not delay the unload (the session expires on the server anyway)
+				client.logout().catch(() => {});
 			}
+			callback();
 		} catch (error) {
 			this.log.error(`Error during unloading: ${error.message}`);
 			callback();

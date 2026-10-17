@@ -33,6 +33,10 @@ The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Prox
 | Validate TLS certificate | Off by default because the Web UI usually uses the self-signed Proxmox certificate |
 | Full status refresh | Interval for reading all targets (minutes, default 60). After a job has finished the status is refreshed immediately. |
 | Job poll interval | How often the job list is checked: when idle (default 30 s) and while a job is running (default 2 s) |
+| Excluded from "update all" | VMs/CTs that the collective update buttons skip (e.g. the ioBroker container itself). They can still be updated individually. The list is loaded from the running instance. |
+| Allow reboot buttons | Creates a `reboot` button for hosts/VMs/CTs that need a reboot. Off by default. |
+| Delete targets that no longer exist | Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). On by default; if off, they are kept. |
+| Notifications | New security updates, reboot required, job failed/interrupted – each can be switched off |
 
 ### States
 
@@ -41,8 +45,10 @@ The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Prox
 | `info.connection` | Connection to the Web UI |
 | `info.lastRefresh`, `info.targetCount`, `info.updaterVersion`, `info.updaterUpdateAvailable` | General information |
 | `jobRunning` | A check/update job is running |
+| `summary.text` | Short summary in the system language, e.g. "7 updates on 3 systems, 1 reboot required" |
 | `summary.*` | Pending security/normal updates in total, targets with updates, unreachable targets, targets that need a reboot |
 | `targets.<name>_<id>.*` | All fields Ultimate Updater delivers per host/LXC/VM (e.g. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
+| `targets.<…>.jobState`, `targets.<…>.jobUnit` | State and id of the latest job of this target (`none` if there is none) |
 | `jobs.<unit>.*` | Running and recent jobs; for failed jobs the last log lines are stored in `log` |
 
 ### Buttons
@@ -54,8 +60,20 @@ The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Prox
 | `checkAll` | Check all targets including hosts |
 | `updateAllVmsCts` | Update all VMs/CTs, hosts excluded |
 | `updateSecurityOnly` | Update all VMs/CTs that have security updates, hosts excluded |
+| `targets.<…>.reboot` | Reboot this host/VM/CT – only exists if reboot buttons are allowed and the target needs a reboot |
+| `jobs.<unit>.cancel` | Cancel this job – only exists while the job is running |
 
-Nothing is ever updated automatically – only when you press a button. While a job is running, further actions are refused. Reboots are not triggered by the adapter.
+Nothing is ever updated or rebooted automatically – only when you press a button. While a job is running, further actions are refused.
+
+### Notifications
+
+The adapter uses the ioBroker notification manager, so Telegram, e-mail, Pushover etc. are configured centrally in ioBroker. Notifications are sent only on changes and in the system language:
+
+- **New security updates** – the number of security updates of a host/VM/CT increased
+- **Reboot required** – a host/VM/CT newly needs a reboot
+- **Job failed** – a check/update/reboot job failed or was interrupted (also jobs that failed while the adapter was stopped)
+
+On the very first start nothing is notified; the current state is only recorded.
 
 ### Note on the API
 
