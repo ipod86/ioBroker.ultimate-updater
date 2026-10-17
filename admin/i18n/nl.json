@@ -26,5 +26,11 @@
 	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "Verzonden via de ioBroker-meldingsmanager (Telegram, e-mail, … worden daar ingesteld). Alleen wijzigingen worden gemeld.",
 	"New security updates": "Nieuwe beveiligingsupdates",
 	"Reboot required": "Herstart vereist",
-	"Job failed or interrupted": "Taak mislukt of onderbroken"
+	"Job failed or interrupted": "Taak mislukt of onderbroken",
+	"Login data": "Inloggegevens",
+	"Enter here": "Hier invoeren",
+	"From the credentials manager (admin settings)": "Uit de credentialsbeheerder (admin-instellingen)",
+	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "De credentialsbeheerder vereist admin 7.9 en js-controller 7.2.2 of nieuwer",
+	"Proxmox login": "Proxmox-login",
+	"A \"Login & password\" credential, e.g. root@pam": "Een credential van het type \"Login & wachtwoord\", bijv. root@pam"
 }

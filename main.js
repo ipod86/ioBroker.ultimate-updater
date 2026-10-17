@@ -9,6 +9,7 @@
  */
 
 const utils = require("@iobroker/adapter-core");
+const { Credentials } = require("@iobroker/adapter-core");
 const { UuClient, BUSY_STATES, FAILURE_STATES } = require("./lib/uu-client");
 const { texts } = require("./lib/i18n");
 
@@ -40,6 +41,8 @@ class UltimateUpdater extends utils.Adapter {
 		/** last notified state (null = first run) */
 		this.notified = null;
 		this.notifiedJobsInitialised = false;
+		/** unsubscribes from the credential of the credentials manager */
+		this.unsubscribeCredential = null;
 		/** object id → JSON of the last written common (avoids rewriting objects) */
 		this.objCache = new Map();
 	}
@@ -50,12 +53,16 @@ class UltimateUpdater extends utils.Adapter {
 	async onReady() {
 		await this.setState("info.connection", false, true);
 
-		if (!this.config.ip || !this.config.username || !this.config.password) {
-			this.log.error("Please configure IP address, user name and password of the Ultimate Updater Web UI.");
+		const cred = await this.resolveCredentials();
+		if (!cred) {
+			return;
+		}
+		if (!this.config.ip) {
+			this.log.error("Please configure the IP address of the Ultimate Updater Web UI.");
 			return;
 		}
 		try {
-			this.client = new UuClient(this.config);
+			this.client = new UuClient({ ...this.config, username: cred.login, password: cred.password });
 		} catch (e) {
 			this.log.error(`Invalid address "${this.config.ip}:${this.config.port}": ${e.message}`);
 			return;
@@ -75,9 +82,79 @@ class UltimateUpdater extends utils.Adapter {
 		this.notifiedJobsInitialised = !!this.notified;
 		this.subscribeStates("*");
 
+		if (this.config.credentialMode === "manager") {
+			await this.watchCredential();
+		}
+
 		await this.refreshStatus();
 		this.scheduleRefresh();
 		this.schedulePoll();
+	}
+
+	// ── credentials ──────────────────────────────────────────────────────────
+
+	/**
+	 * Login data from the settings or from the central credentials manager (admin ≥ 7.9).
+	 *
+	 * @returns {Promise<{login: string, password: string} | null>} login data or null if not usable
+	 */
+	async resolveCredentials() {
+		if (this.config.credentialMode === "manager") {
+			if (!Credentials || !Credentials.getCredentials) {
+				this.log.error(
+					"The credentials manager is not available. Please update js-controller to 7.2.2 or higher.",
+				);
+				return null;
+			}
+			if (!this.config.credentialId) {
+				this.log.error("Please select the login data in the adapter settings (credentials manager).");
+				return null;
+			}
+			try {
+				const c = await Credentials.getCredentials(this, this.config.credentialId);
+				const login = String(c.values.login || "");
+				const password = String(c.values.password || "");
+				if (!login || !password) {
+					this.log.error(
+						`Credential "${this.config.credentialId}" has no login/password (a key credential cannot be used).`,
+					);
+					return null;
+				}
+				return { login, password };
+			} catch (e) {
+				this.log.error(`Cannot read credential "${this.config.credentialId}": ${e.message}`);
+				return null;
+			}
+		}
+		if (!this.config.username || !this.config.password) {
+			this.log.error("Please configure user name and password of the Ultimate Updater Web UI.");
+			return null;
+		}
+		return { login: this.config.username, password: this.config.password };
+	}
+
+	/** Reacts to changes of the selected credential: new login data are used right away. */
+	async watchCredential() {
+		try {
+			this.unsubscribeCredential = await Credentials.subscribeCredentials(
+				this,
+				this.config.credentialId,
+				(id, cred) => {
+					if (!cred) {
+						this.log.warn(`Credential ${id} was deleted – please select other login data.`);
+						this.setState("info.connection", false, true);
+						return;
+					}
+					this.log.info(`Credential ${id} was changed, logging in again`);
+					if (this.client) {
+						this.client.setCredentials(cred.values.login, cred.values.password);
+					}
+					this.refreshStatus();
+				},
+			);
+		} catch (e) {
+			this.log.warn(`Changes of credential ${this.config.credentialId} cannot be watched: ${e.message}`);
+		}
 	}
 
 	// ── helpers ──
@@ -829,6 +906,10 @@ class UltimateUpdater extends utils.Adapter {
 			}
 			if (this.pollTimer) {
 				this.clearTimeout(this.pollTimer);
+			}
+			if (this.unsubscribeCredential) {
+				this.unsubscribeCredential().catch(() => {});
+				this.unsubscribeCredential = null;
 			}
 			const client = this.client;
 			this.client = null;

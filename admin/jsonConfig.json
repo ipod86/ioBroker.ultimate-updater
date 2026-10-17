@@ -44,6 +44,39 @@
 			"lg": 2,
 			"xl": 2
 		},
+		"credentialMode": {
+			"type": "select",
+			"label": "Login data",
+			"options": [
+				{
+					"label": "Enter here",
+					"value": "manual"
+				},
+				{
+					"label": "From the credentials manager (admin settings)",
+					"value": "manager"
+				}
+			],
+			"help": "The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"credentialId": {
+			"type": "credential",
+			"label": "Proxmox login",
+			"help": "A \"Login & password\" credential, e.g. root@pam",
+			"hidden": "data.credentialMode !== 'manager'",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
 		"username": {
 			"type": "text",
 			"label": "Username",
@@ -53,7 +86,8 @@
 			"md": 6,
 			"lg": 4,
 			"xl": 4,
-			"help": "Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA."
+			"help": "Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA.",
+			"hidden": "data.credentialMode === 'manager'"
 		},
 		"password": {
 			"type": "password",
@@ -64,7 +98,8 @@
 			"md": 6,
 			"lg": 4,
 			"xl": 4,
-			"repeat": false
+			"repeat": false,
+			"hidden": "data.credentialMode === 'manager'"
 		},
 		"realm": {
 			"type": "text",

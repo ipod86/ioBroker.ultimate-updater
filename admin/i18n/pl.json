@@ -26,5 +26,11 @@
 	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "Wysyłane przez menedżer powiadomień ioBroker (Telegram, e-mail, … konfiguruje się tam). Powiadamiane są tylko zmiany.",
 	"New security updates": "Nowe aktualizacje bezpieczeństwa",
 	"Reboot required": "Wymagany restart",
-	"Job failed or interrupted": "Zadanie nie powiodło się lub przerwane"
+	"Job failed or interrupted": "Zadanie nie powiodło się lub przerwane",
+	"Login data": "Dane logowania",
+	"Enter here": "Wprowadź tutaj",
+	"From the credentials manager (admin settings)": "Z menedżera poświadczeń (ustawienia admin)",
+	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "Menedżer poświadczeń wymaga admin 7.9 i js-controller 7.2.2 lub nowszego",
+	"Proxmox login": "Logowanie Proxmox",
+	"A \"Login & password\" credential, e.g. root@pam": "Poświadczenie typu „Login i hasło”, np. root@pam"
 }

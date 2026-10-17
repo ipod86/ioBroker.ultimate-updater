@@ -28,7 +28,8 @@ The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Prox
 | Setting | Description |
 |---|---|
 | IP address / host name, Port, Use HTTPS | Address of the Ultimate Updater Web UI |
-| Username / Password | Proxmox user name **without** `@realm` (e.g. `root`) and password. `root@pam` is split automatically. The password is stored encrypted. |
+| Login data | **Enter here** (user name and password in the adapter settings) or **from the credentials manager** of the admin (Settings → Credentials, needs admin 7.9 and js-controller 7.2.2 or newer). With the credentials manager you select a "Login & password" credential; changes to it are used immediately without restarting the adapter. |
+| Username / Password | Only for "enter here": Proxmox user name **without** `@realm` (e.g. `root`) and password. `root@pam` is split automatically. The password is stored encrypted. |
 | Realm | Authentication domain as shown on the Web UI login, e.g. `pam` or `pve` |
 | Validate TLS certificate | Off by default because the Web UI usually uses the self-signed Proxmox certificate |
 | Full status refresh | Interval for reading all targets (minutes, default 60). After a job has finished the status is refreshed immediately. |

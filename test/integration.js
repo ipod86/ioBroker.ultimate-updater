@@ -150,5 +150,69 @@ tests.integration(path.join(__dirname, ".."), {
 				expect(mock.state.sessions.size).to.equal(0);
 			});
 		});
+
+		suite("With login data from the credentials manager", getHarness => {
+			/** @type {any} */
+			let mock;
+			/** @type {any} */
+			let harness;
+			/** @type {(v: string) => string} */
+			let encrypt;
+			const NS = "ultimate-updater.0";
+			const CRED = "system.credentials.uu-test";
+			const wait = ms => new Promise(r => setTimeout(r, ms));
+
+			before(async function () {
+				this.timeout(60000);
+				mock = await startMock();
+				harness = getHarness();
+				const sys = await harness.objects.getObjectAsync("system.config");
+				const secret = String(sys.native.secret);
+				encrypt = v =>
+					[...v]
+						.map((c, i) => String.fromCharCode(secret.charCodeAt(i % secret.length) ^ c.charCodeAt(0)))
+						.join("");
+				await harness.objects.setObjectAsync(CRED, {
+					type: "config",
+					common: { name: "UU test login" },
+					native: { type: "custom", version: 1, encryptedFields: ["password"], login: "root@pam", password: encrypt("secret") },
+				});
+				const obj = await harness.objects.getObjectAsync(`system.adapter.${NS}`);
+				Object.assign(obj.native, {
+					ip: "127.0.0.1",
+					port: mock.port,
+					https: false,
+					credentialMode: "manager",
+					credentialId: CRED,
+					username: "",
+					password: "",
+					realm: "",
+				});
+				await harness.objects.setObjectAsync(obj._id, obj);
+				await harness.startAdapterAndWait();
+				await wait(3000);
+			});
+			after(() => mock && mock.server.close());
+
+			it("logs in with the credential", async () => {
+				expect(mock.state.lastLogin).to.deep.include({ username: "root", realm: "pam", password: "secret" });
+				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
+				expect(conn && conn.val).to.equal(true);
+			});
+
+			it("uses changed login data right away", async function () {
+				this.timeout(15000);
+				const cred = await harness.objects.getObjectAsync(CRED);
+				cred.native.login = "admin@pve";
+				await harness.objects.setObjectAsync(CRED, cred);
+				await wait(3000);
+				expect(mock.state.lastLogin).to.deep.include({ username: "admin", realm: "pve" });
+			});
+
+			it("stops", async function () {
+				this.timeout(10000);
+				await harness.stopAdapter();
+			});
+		});
 	},
 });
