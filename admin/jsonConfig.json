@@ -2,15 +2,47 @@
 	"i18n": true,
 	"type": "panel",
 	"items": {
-		"url": {
+		"_info": {
+			"type": "staticText",
+			"text": "Unofficial adapter for BassT23's Ultimate Updater (github.com/BassT23/Proxmox). Updates are only started by pressing a button – never automatically.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 12,
+			"xl": 12
+		},
+		"ip": {
 			"type": "text",
-			"label": "Ultimate Updater Web UI URL",
+			"label": "IP address / host name",
+			"help": "Address of the Ultimate Updater Web UI, e.g. 192.168.1.10",
 			"newLine": true,
 			"xs": 12,
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
 			"xl": 4
+		},
+		"port": {
+			"type": "number",
+			"label": "Port",
+			"help": "Web UI port, default 8765",
+			"min": 1,
+			"max": 65535,
+			"xs": 12,
+			"sm": 6,
+			"md": 3,
+			"lg": 2,
+			"xl": 2
+		},
+		"https": {
+			"type": "checkbox",
+			"label": "Use HTTPS",
+			"xs": 12,
+			"sm": 6,
+			"md": 3,
+			"lg": 2,
+			"xl": 2
 		},
 		"username": {
 			"type": "text",
@@ -20,17 +52,19 @@
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"help": "Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA."
 		},
 		"password": {
-			"type": "text",
+			"type": "password",
 			"label": "Password",
 			"newLine": true,
 			"xs": 12,
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"repeat": false
 		},
 		"realm": {
 			"type": "text",
@@ -40,7 +74,8 @@
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"help": "Authentication domain as shown on the Web UI login, e.g. pam or pve"
 		},
 		"validateCertificate": {
 			"type": "checkbox",
@@ -60,7 +95,9 @@
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"min": 1,
+			"max": 35791
 		},
 		"pollIdle": {
 			"type": "number",
@@ -70,7 +107,9 @@
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"min": 5,
+			"max": 86400
 		},
 		"pollBusy": {
 			"type": "number",
@@ -80,7 +119,9 @@
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
-			"xl": 4
+			"xl": 4,
+			"min": 1,
+			"max": 86400
 		}
 	}
 }

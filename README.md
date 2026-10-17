@@ -10,114 +10,56 @@
 
 **Tests:** ![Test and Release](https://github.com/ipod86/ioBroker.ultimate-updater/workflows/Test%20and%20Release/badge.svg)
 
-## ultimate-updater adapter for ioBroker
+## Ultimate Updater adapter for ioBroker
 
-Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates
+Brings the update status of your Proxmox hosts, LXC containers and VMs into ioBroker and lets you start checks and updates with a button.
 
-## Developer manual
-This section is intended for the developer. It can be deleted later.
+The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Proxmox) by [@BassT23](https://github.com/BassT23)**. Ultimate Updater does the actual work on your Proxmox cluster (update execution, snapshots/backups, filters, status model); this adapter only reads its Web UI API and triggers the actions it offers. Many thanks to BassT23 for the permission to use the name.
 
-### DISCLAIMER
+> **Unofficial community adapter.** It is not affiliated with Ultimate Updater or Proxmox Server Solutions GmbH. Proxmox® is a registered trademark of Proxmox Server Solutions GmbH.
 
-Please make sure that you consider copyrights and trademarks when you use names or logos of a company and add a disclaimer to your README.
-You can check other adapters for examples or ask in the developer community. Using a name or logo of a company without permission may cause legal problems for you.
+### Requirements
 
-### Getting started
+- Ultimate Updater **5.1.3 or newer** with the Web UI enabled (default port `8765`)
+- A Proxmox account for the Web UI login (e.g. `root`, realm `pam`). Ultimate Updater only accepts accounts with full **Administrator** privileges at `/` and **without two-factor authentication**.
 
-You are almost done, only a few steps left:
-1. Create a new repository on GitHub with the name `ioBroker.ultimate-updater`
-1. Initialize the current folder as a new git repository:  
-	```bash
-	git init -b main
-	git add .
-	git commit -m "Initial commit"
-	```
-1. Link your local repository with the one on GitHub:  
-	```bash
-	git remote add origin https://github.com/ipod86/ioBroker.ultimate-updater
-	```
+### Configuration
 
-1. Push all files to the GitHub repo:  
-	```bash
-	git push origin main
-	```
-1. Add a new secret under https://github.com/ipod86/ioBroker.ultimate-updater/settings/secrets. It must be named `AUTO_MERGE_TOKEN` and contain a personal access token with push access to the repository, e.g. yours. You can create a new token under https://github.com/settings/tokens.
+| Setting | Description |
+|---|---|
+| IP address / host name, Port, Use HTTPS | Address of the Ultimate Updater Web UI |
+| Username / Password | Proxmox user name **without** `@realm` (e.g. `root`) and password. `root@pam` is split automatically. The password is stored encrypted. |
+| Realm | Authentication domain as shown on the Web UI login, e.g. `pam` or `pve` |
+| Validate TLS certificate | Off by default because the Web UI usually uses the self-signed Proxmox certificate |
+| Full status refresh | Interval for reading all targets (minutes, default 60). After a job has finished the status is refreshed immediately. |
+| Job poll interval | How often the job list is checked: when idle (default 30 s) and while a job is running (default 2 s) |
 
-1. Head over to [main.js](main.js) and start programming!
+### States
 
-### Best Practices
-We've collected some [best practices](https://github.com/ioBroker/ioBroker.repositories#development-and-coding-best-practices) regarding ioBroker development and coding in general. If you're new to ioBroker or Node.js, you should
-check them out. If you're already experienced, you should also take a look at them - you might learn something new :)
+| State | Description |
+|---|---|
+| `info.connection` | Connection to the Web UI |
+| `info.lastRefresh`, `info.targetCount`, `info.updaterVersion`, `info.updaterUpdateAvailable` | General information |
+| `jobRunning` | A check/update job is running |
+| `summary.*` | Pending security/normal updates in total, targets with updates, unreachable targets, targets that need a reboot |
+| `targets.<name>_<id>.*` | All fields Ultimate Updater delivers per host/LXC/VM (e.g. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
+| `jobs.<unit>.*` | Running and recent jobs; for failed jobs the last log lines are stored in `log` |
 
-### State Roles
-When creating state objects, it is important to use the correct role for the state. The role defines how the state should be interpreted by visualizations and other adapters. For a list of available roles and their meanings, please refer to the [state roles documentation](https://www.iobroker.net/#en/documentation/dev/stateroles.md).
+### Buttons
 
-**Important:** Do not invent your own custom role names. If you need a role that is not part of the official list, please contact the ioBroker developer community for guidance and discussion about adding new roles.
+| Button | Action |
+|---|---|
+| `targets.<…>.checkNow` | Check this host/VM/CT (no update) |
+| `targets.<…>.updateNow` | Update this host/VM/CT (hosts via node update, guests are not touched) |
+| `checkAll` | Check all targets including hosts |
+| `updateAllVmsCts` | Update all VMs/CTs, hosts excluded |
+| `updateSecurityOnly` | Update all VMs/CTs that have security updates, hosts excluded |
 
-### Scripts in `package.json`
-Several npm scripts are predefined for your convenience. You can run them using `npm run <scriptname>`
-| Script name | Description |
-|-------------|-------------|
-| `test:js` | Executes the tests you defined in `*.test.js` files. |
-| `test:package` | Ensures your `package.json` and `io-package.json` are valid. |
-| `test:integration` | Tests the adapter startup with an actual instance of ioBroker. |
-| `test` | Performs a minimal test run on package files and your tests. |
-| `check` | Performs a type-check on your code (without compiling anything). |
-| `lint` | Runs `ESLint` to check your code for formatting errors and potential bugs. |
-| `translate` | Translates texts in your adapter to all required languages, see [`@iobroker/adapter-dev`](https://github.com/ioBroker/adapter-dev#manage-translations) for more details. |
-| `release` | Creates a new release, see [`@alcalzone/release-script`](https://github.com/AlCalzone/release-script#usage) for more details. |
+Nothing is ever updated automatically – only when you press a button. While a job is running, further actions are refused. Reboots are not triggered by the adapter.
 
-### Writing tests
-When done right, testing code is invaluable, because it gives you the 
-confidence to change your code while knowing exactly if and when 
-something breaks. A good read on the topic of test-driven development 
-is https://hackernoon.com/introduction-to-test-driven-development-tdd-61a13bc92d92. 
-Although writing tests before the code might seem strange at first, but it has very 
-clear upsides.
+### Note on the API
 
-The template provides you with basic tests for the adapter startup and package files.
-It is recommended that you add your own tests into the mix.
-
-### Publishing the adapter
-Using GitHub Actions, you can enable automatic releases on npm whenever you push a new git tag that matches the form 
-`v<major>.<minor>.<patch>`. We **strongly recommend** that you do. The necessary steps are described in `.github/workflows/test-and-release.yml`.
-
-Since you installed the release script, you can create a new
-release simply by calling:
-```bash
-npm run release
-```
-Additional command line options for the release script are explained in the
-[release-script documentation](https://github.com/AlCalzone/release-script#command-line).
-
-To get your adapter released in ioBroker, please refer to the documentation 
-of [ioBroker.repositories](https://github.com/ioBroker/ioBroker.repositories#requirements-for-adapter-to-get-added-to-the-latest-repository).
-
-### Test the adapter manually on a local ioBroker installation
-In order to install the adapter locally without publishing, the following steps are recommended:
-1. Create a GitHub repository for your adapter if you haven't already
-1. Push your code to the GitHub repository
-1. Use the ioBroker Admin interface or command line to install the adapter from GitHub:
-	* **Via Admin UI**: Go to the "Adapters" tab, click on "Custom Install" (GitHub icon), and enter your repository URL:
-		```
-		https://github.com/ipod86/ioBroker.ultimate-updater
-		```
-		You can also install from a specific branch by adding `#branchname` at the end:
-		```
-		https://github.com/ipod86/ioBroker.ultimate-updater#dev
-		```
-	* **Via Command Line**: Install using the `iob` command:
-		```bash
-		iob url https://github.com/ipod86/ioBroker.ultimate-updater
-		```
-		Or from a specific branch:
-		```bash
-		iob url https://github.com/ipod86/ioBroker.ultimate-updater#dev
-		```
-
-For later updates:
-1. Push your changes to GitHub
-1. Repeat the installation steps above (via Admin UI or `iob url` command) to update the adapter
+The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, versioned API with token authentication is being discussed upstream ([BassT23/Proxmox#378](https://github.com/BassT23/Proxmox/issues/378)); the adapter will switch to it once it is available.
 
 ## Changelog
 <!--

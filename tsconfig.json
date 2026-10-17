@@ -25,6 +25,9 @@
 		// "noUnusedParameters": true,
 		"useUnknownInCatchVariables": false,
 
+		// test runner globals (describe/it) for the test files
+		"types": ["node", "mocha"],
+
 	},
 	"include": [
 		"**/*.js",

@@ -47,6 +47,7 @@
 			"ipod86 <david@graef.email>"
 		],
 		"keywords": [
+			"ioBroker",
 			"proxmox",
 			"updater",
 			"ultimate updater",
@@ -80,12 +81,14 @@
 		],
 		"globalDependencies": [
 			{
-				"admin": ">=7.0.23"
+				"admin": ">=7.6.20"
 			}
 		]
 	},
 	"native": {
-		"url": "https://192.168.1.10:8765",
+		"ip": "192.168.1.10",
+		"port": 8765,
+		"https": true,
 		"username": "root",
 		"password": "",
 		"realm": "pam",
@@ -117,5 +120,11 @@
 			},
 			"native": {}
 		}
+	],
+	"encryptedNative": [
+		"password"
+	],
+	"protectedNative": [
+		"password"
 	]
 }

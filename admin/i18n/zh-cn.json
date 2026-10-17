@@ -1,11 +1,18 @@
 {
 	"ultimate-updater adapter settings": "ultimate-updater的适配器设置",
-	"Ultimate Updater Web UI URL": "最终更新程序 Web UI URL",
 	"Username": "用户名",
 	"Password": "密码",
-	"Realm": "领域",
+	"Realm": "认证域（realm）",
 	"Validate TLS certificate": "验证 TLS 证书",
 	"Full status refresh (minutes)": "完整状态刷新（分钟）",
 	"Job poll interval when idle (seconds)": "空闲时作业轮询间隔（秒）",
-	"Job poll interval while a job is running (seconds)": "作业运行时的作业轮询间隔（秒）"
+	"Job poll interval while a job is running (seconds)": "作业运行时的作业轮询间隔（秒）",
+	"Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA.": "不带 @realm 的 Proxmox 用户，例如 root。需要在“/”上拥有完整管理员权限且不能启用双重认证。",
+	"Authentication domain as shown on the Web UI login, e.g. pam or pve": "网页登录时的认证域，例如 pam 或 pve",
+	"Unofficial adapter for BassT23's Ultimate Updater (github.com/BassT23/Proxmox). Updates are only started by pressing a button – never automatically.": "BassT23 的 Ultimate Updater 非官方适配器（github.com/BassT23/Proxmox）。更新只能通过按钮启动，绝不会自动执行。",
+	"IP address / host name": "IP 地址 / 主机名",
+	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Ultimate Updater 网页界面地址，例如 192.168.1.10",
+	"Port": "端口",
+	"Web UI port, default 8765": "网页界面端口，默认 8765",
+	"Use HTTPS": "使用 HTTPS"
 }

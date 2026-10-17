@@ -1,11 +1,18 @@
 {
 	"ultimate-updater adapter settings": "Configurações do adaptador para ultimate-updater",
-	"Ultimate Updater Web UI URL": "URL da interface da Web do atualizador final",
 	"Username": "Nome de usuário",
 	"Password": "Senha",
-	"Realm": "Reino",
+	"Realm": "Domínio (realm)",
 	"Validate TLS certificate": "Validar certificado TLS",
 	"Full status refresh (minutes)": "Atualização completa de status (minutos)",
 	"Job poll interval when idle (seconds)": "Intervalo de pesquisa de trabalho quando ocioso (segundos)",
-	"Job poll interval while a job is running (seconds)": "Intervalo de sondagem de trabalho enquanto um trabalho está em execução (segundos)"
+	"Job poll interval while a job is running (seconds)": "Intervalo de sondagem de trabalho enquanto um trabalho está em execução (segundos)",
+	"Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA.": "Utilizador Proxmox sem @realm, p. ex. root. Requer direitos totais de administrador em \"/\" e sem 2FA.",
+	"Authentication domain as shown on the Web UI login, e.g. pam or pve": "Domínio de autenticação como no login web, p. ex. pam ou pve",
+	"Unofficial adapter for BassT23's Ultimate Updater (github.com/BassT23/Proxmox). Updates are only started by pressing a button – never automatically.": "Adaptador não oficial para o Ultimate Updater de BassT23 (github.com/BassT23/Proxmox). As atualizações só são iniciadas por botão – nunca automaticamente.",
+	"IP address / host name": "Endereço IP / nome do host",
+	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Endereço da interface web do Ultimate Updater, p. ex. 192.168.1.10",
+	"Port": "Porta",
+	"Web UI port, default 8765": "Porta da interface web, padrão 8765",
+	"Use HTTPS": "Usar HTTPS"
 }
