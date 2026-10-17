@@ -1,0 +1,11 @@
+{
+	"ultimate-updater adapter settings": "Adapterinstellingen voor ultimate-updater",
+	"Ultimate Updater Web UI URL": "Ultieme Updater Web UI-URL",
+	"Username": "Gebruikersnaam",
+	"Password": "Wachtwoord",
+	"Realm": "Rijk",
+	"Validate TLS certificate": "Valideer het TLS-certificaat",
+	"Full status refresh (minutes)": "Volledige statusvernieuwing (minuten)",
+	"Job poll interval when idle (seconds)": "Taakpeilingsinterval bij inactiviteit (seconden)",
+	"Job poll interval while a job is running (seconds)": "Taakpeilingsinterval terwijl een taak wordt uitgevoerd (seconden)"
+}

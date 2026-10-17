@@ -1,0 +1,121 @@
+{
+	"common": {
+		"name": "ultimate-updater",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"uk": "Початкова версія",
+				"zh-cn": "首次出版"
+			}
+		},
+		"titleLang": {
+			"en": "Ultimate Updater",
+			"de": "Ultimativer Updater",
+			"ru": "Ultimate Updater",
+			"pt": "Atualizador final",
+			"nl": "Ultieme updater",
+			"fr": "Programme de mise à jour ultime",
+			"it": "Aggiornamento definitivo",
+			"es": "Actualizador definitivo",
+			"pl": "Ostateczny aktualizator",
+			"uk": "Остаточний засіб оновлення",
+			"zh-cn": "终极更新程序"
+		},
+		"desc": {
+			"en": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
+			"de": "Zeigt den Update-Status von Proxmox-Hosts, LXC-Containern und VMs aus dem Ultimate Updater von BassT23 an und löst Prüfungen/Updates aus",
+			"ru": "Показывает статус обновления хостов Proxmox, контейнеров LXC и виртуальных машин из Ultimate Updater BassT23 и запускает проверки/обновления.",
+			"pt": "Mostra o status de atualização de hosts Proxmox, contêineres LXC e VMs do Ultimate Updater do BassT23 e aciona verificações/atualizações",
+			"nl": "Toont de updatestatus van Proxmox-hosts, LXC-containers en VM's van BassT23's Ultimate Updater en activeert controles/updates",
+			"fr": "Affiche l'état de mise à jour des hôtes Proxmox, des conteneurs LXC et des machines virtuelles à partir de Ultimate Updater de BassT23 et déclenche des vérifications/mises à jour.",
+			"it": "Mostra lo stato di aggiornamento degli host Proxmox, dei contenitori LXC e delle VM da Ultimate Updater di BassT23 e attiva controlli/aggiornamenti",
+			"es": "Muestra el estado de actualización de los hosts Proxmox, contenedores LXC y máquinas virtuales de Ultimate Updater de BassT23 y activa comprobaciones/actualizaciones",
+			"pl": "Pokazuje status aktualizacji hostów Proxmox, kontenerów LXC i maszyn wirtualnych z Ultimate Updater BassT23 i wyzwala kontrole/aktualizacje",
+			"uk": "Показує статус оновлення хостів Proxmox, контейнерів LXC і віртуальних машин із BassT23 Ultimate Updater і запускає перевірки/оновлення",
+			"zh-cn": "显示来自 BassT23 终极更新程序的 Proxmox 主机、LXC 容器和虚拟机的更新状态并触发检查/更新"
+		},
+		"authors": [
+			"ipod86 <david@graef.email>"
+		],
+		"keywords": [
+			"proxmox",
+			"updater",
+			"ultimate updater",
+			"lxc",
+			"vm",
+			"apt"
+		],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "ultimate-updater.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/admin/ultimate-updater.png",
+		"readme": "https://github.com/ipod86/ioBroker.ultimate-updater/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "utility",
+		"compact": true,
+		"connectionType": "local",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=6.0.11"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": ">=7.0.23"
+			}
+		]
+	},
+	"native": {
+		"url": "https://192.168.1.10:8765",
+		"username": "root",
+		"password": "",
+		"realm": "pam",
+		"validateCertificate": false,
+		"refreshInterval": 60,
+		"pollIdle": 30,
+		"pollBusy": 2
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}

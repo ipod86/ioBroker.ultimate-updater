@@ -1,0 +1,11 @@
+{
+	"ultimate-updater adapter settings": "ultimate-updater的适配器设置",
+	"Ultimate Updater Web UI URL": "最终更新程序 Web UI URL",
+	"Username": "用户名",
+	"Password": "密码",
+	"Realm": "领域",
+	"Validate TLS certificate": "验证 TLS 证书",
+	"Full status refresh (minutes)": "完整状态刷新（分钟）",
+	"Job poll interval when idle (seconds)": "空闲时作业轮询间隔（秒）",
+	"Job poll interval while a job is running (seconds)": "作业运行时的作业轮询间隔（秒）"
+}

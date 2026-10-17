@@ -1,0 +1,102 @@
+{
+	"cli": true,
+	"target": "directory",
+	"adapterName": "ultimate-updater",
+	"title": "Ultimate Updater",
+	"description": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
+	"keywords": [
+		"proxmox",
+		"updater",
+		"ultimate updater",
+		"lxc",
+		"vm",
+		"apt"
+	],
+	"contributors": [],
+	"expert": "yes",
+	"features": [
+		"adapter"
+	],
+	"adminFeatures": [],
+	"type": "utility",
+	"startMode": "daemon",
+	"connectionType": "local",
+	"dataSource": "poll",
+	"connectionIndicator": "yes",
+	"adapterSettings": [
+		{
+			"key": "url",
+			"defaultValue": "https://192.168.1.10:8765",
+			"inputType": "text",
+			"label": "Ultimate Updater Web UI URL"
+		},
+		{
+			"key": "username",
+			"defaultValue": "root",
+			"inputType": "text",
+			"label": "Username"
+		},
+		{
+			"key": "password",
+			"defaultValue": "",
+			"inputType": "text",
+			"label": "Password"
+		},
+		{
+			"key": "realm",
+			"defaultValue": "pam",
+			"inputType": "text",
+			"label": "Realm"
+		},
+		{
+			"key": "validateCertificate",
+			"defaultValue": false,
+			"inputType": "checkbox",
+			"label": "Validate TLS certificate"
+		},
+		{
+			"key": "refreshInterval",
+			"defaultValue": 60,
+			"inputType": "number",
+			"label": "Full status refresh (minutes)"
+		},
+		{
+			"key": "pollIdle",
+			"defaultValue": 30,
+			"inputType": "number",
+			"label": "Job poll interval when idle (seconds)"
+		},
+		{
+			"key": "pollBusy",
+			"defaultValue": 2,
+			"inputType": "number",
+			"label": "Job poll interval while a job is running (seconds)"
+		}
+	],
+	"language": "JavaScript",
+	"nodeVersion": "22",
+	"adminUi": "json",
+	"tools": [
+		"ESLint",
+		"type checking"
+	],
+	"eslintConfig": "official",
+	"releaseScript": "yes",
+	"devServer": "no",
+	"indentation": "Tab",
+	"quotes": "double",
+	"authorName": "ipod86",
+	"authorGithub": "ipod86",
+	"authorEmail": "david@graef.email",
+	"gitRemoteProtocol": "HTTPS",
+	"gitCommit": "no",
+	"defaultBranch": "main",
+	"license": "MIT License",
+	"licenseInformation": {
+		"type": "free",
+		"license": "MIT"
+	},
+	"dependabot": "yes",
+	"replay": "/tmp/claude-0/-root/9238533a-4d31-44a2-9519-6278a2ac9f5d/scratchpad/gen/answers.json",
+	"creatorVersion": "3.1.5"
+}

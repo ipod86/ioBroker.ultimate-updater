@@ -1,0 +1,86 @@
+{
+	"i18n": true,
+	"type": "panel",
+	"items": {
+		"url": {
+			"type": "text",
+			"label": "Ultimate Updater Web UI URL",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"username": {
+			"type": "text",
+			"label": "Username",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"password": {
+			"type": "text",
+			"label": "Password",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"realm": {
+			"type": "text",
+			"label": "Realm",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"validateCertificate": {
+			"type": "checkbox",
+			"label": "Validate TLS certificate",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"refreshInterval": {
+			"type": "number",
+			"label": "Full status refresh (minutes)",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"pollIdle": {
+			"type": "number",
+			"label": "Job poll interval when idle (seconds)",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"pollBusy": {
+			"type": "number",
+			"label": "Job poll interval while a job is running (seconds)",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		}
+	}
+}

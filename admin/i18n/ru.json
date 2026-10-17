@@ -1,0 +1,11 @@
+{
+	"ultimate-updater adapter settings": "Настройки адаптера для ultimate-updater",
+	"Ultimate Updater Web UI URL": "URL-адрес веб-интерфейса Ultimate Updater",
+	"Username": "Имя пользователя",
+	"Password": "Пароль",
+	"Realm": "Область",
+	"Validate TLS certificate": "Подтвердить сертификат TLS",
+	"Full status refresh (minutes)": "Полное обновление статуса (минуты)",
+	"Job poll interval when idle (seconds)": "Интервал опроса задания в режиме ожидания (секунды)",
+	"Job poll interval while a job is running (seconds)": "Интервал опроса задания во время выполнения задания (в секундах)"
+}

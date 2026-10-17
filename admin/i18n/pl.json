@@ -1,0 +1,11 @@
+{
+	"ultimate-updater adapter settings": "Ustawienia adaptera dla ultimate-updater",
+	"Ultimate Updater Web UI URL": "Adres URL interfejsu internetowego narzędzia Ultimate Updater",
+	"Username": "Nazwa użytkownika",
+	"Password": "Hasło",
+	"Realm": "Królestwo",
+	"Validate TLS certificate": "Zweryfikuj certyfikat TLS",
+	"Full status refresh (minutes)": "Pełne odświeżanie statusu (minuty)",
+	"Job poll interval when idle (seconds)": "Interwał sondowania zadań w stanie bezczynności (sekundy)",
+	"Job poll interval while a job is running (seconds)": "Interwał sondowania zadania podczas wykonywania zadania (sekundy)"
+}

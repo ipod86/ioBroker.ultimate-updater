@@ -1,0 +1,11 @@
+{
+	"ultimate-updater adapter settings": "Adaptereinstellungen für ultimate-updater",
+	"Ultimate Updater Web UI URL": "URL der Ultimate Updater-Web-Benutzeroberfläche",
+	"Username": "Benutzername",
+	"Password": "Passwort",
+	"Realm": "Reich",
+	"Validate TLS certificate": "TLS-Zertifikat validieren",
+	"Full status refresh (minutes)": "Vollständige Statusaktualisierung (Minuten)",
+	"Job poll interval when idle (seconds)": "Job-Abfrageintervall im Leerlauf (Sekunden)",
+	"Job poll interval while a job is running (seconds)": "Jobabfrageintervall während der Ausführung eines Jobs (Sekunden)"
+}
