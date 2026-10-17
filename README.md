@@ -92,6 +92,8 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 ### **WORK IN PROGRESS**
 * (ipod86) initial release
 
+Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
+
 ## License
 MIT License
 

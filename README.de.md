@@ -92,6 +92,8 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 ### **WORK IN PROGRESS**
 * (ipod86) Erste Version
 
+Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
+
 ## License
 MIT License
 
