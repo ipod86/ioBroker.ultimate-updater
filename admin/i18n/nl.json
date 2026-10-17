@@ -32,9 +32,15 @@
 	"From the credentials manager (admin settings)": "Uit de credentialsbeheerder (admin-instellingen)",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "De credentialsbeheerder vereist admin 7.9 en js-controller 7.2.2 of nieuwer",
 	"Proxmox login": "Proxmox-login",
-	"A \"Login & password\" credential, e.g. root@pam": "Een credential van het type \"Login & wachtwoord\", bijv. root@pam",
 	"Collective updates include": "Verzamelupdates omvatten",
 	"Only running VMs/CTs": "Alleen draaiende VM's/CT's",
 	"All VMs/CTs (also shut down ones)": "Alle VM's/CT's (ook uitgeschakelde)",
-	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "\"Alle\" werkt alleen als het bijwerken van gestopte gasten ook in Ultimate Updater is ingeschakeld (STOPPED_CONTAINER / STOPPED_VM in update.conf) – hij start ze dan voor de update en schakelt ze daarna weer uit. Anders slaat Ultimate Updater ze over en mislukt de taak."
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "\"Alle\" werkt alleen als het bijwerken van gestopte gasten ook in Ultimate Updater is ingeschakeld (STOPPED_CONTAINER / STOPPED_VM in update.conf) – hij start ze dan voor de update en schakelt ze daarna weer uit. Anders slaat Ultimate Updater ze over en mislukt de taak.",
+	"Authentication": "Authenticatie",
+	"Web UI login (Proxmox user)": "Web UI-login (Proxmox-gebruiker)",
+	"API token (integration API v1)": "API-token (integratie-API v1)",
+	"API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".": "API-token: Ultimate Updater 5.2 of nieuwer, alleen HTTPS. Maak hem op de host aan met \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".",
+	"Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.": "Web UI-login: een credential \"Login & wachtwoord\" (bijv. root@pam). API-token: een credential van het type \"Sleutel\".",
+	"API token": "API-token",
+	"Shown only once when it is created on the host. Stored encrypted.": "Wordt bij het aanmaken op de host maar één keer getoond. Wordt versleuteld opgeslagen."
 }

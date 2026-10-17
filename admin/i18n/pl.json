@@ -32,9 +32,15 @@
 	"From the credentials manager (admin settings)": "Z menedżera poświadczeń (ustawienia admin)",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "Menedżer poświadczeń wymaga admin 7.9 i js-controller 7.2.2 lub nowszego",
 	"Proxmox login": "Logowanie Proxmox",
-	"A \"Login & password\" credential, e.g. root@pam": "Poświadczenie typu „Login i hasło”, np. root@pam",
 	"Collective updates include": "Aktualizacje zbiorcze obejmują",
 	"Only running VMs/CTs": "Tylko działające maszyny/kontenery",
 	"All VMs/CTs (also shut down ones)": "Wszystkie maszyny/kontenery (także wyłączone)",
-	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "„Wszystkie” działa tylko wtedy, gdy w Ultimate Updater włączona jest też aktualizacja zatrzymanych gości (STOPPED_CONTAINER / STOPPED_VM w update.conf) – uruchamia je wtedy na czas aktualizacji i ponownie wyłącza. W przeciwnym razie Ultimate Updater je pomija, a zadanie kończy się błędem."
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "„Wszystkie” działa tylko wtedy, gdy w Ultimate Updater włączona jest też aktualizacja zatrzymanych gości (STOPPED_CONTAINER / STOPPED_VM w update.conf) – uruchamia je wtedy na czas aktualizacji i ponownie wyłącza. W przeciwnym razie Ultimate Updater je pomija, a zadanie kończy się błędem.",
+	"Authentication": "Uwierzytelnianie",
+	"Web UI login (Proxmox user)": "Logowanie do interfejsu WWW (użytkownik Proxmox)",
+	"API token (integration API v1)": "Token API (API integracyjne v1)",
+	"API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".": "Token API: Ultimate Updater 5.2 lub nowszy, tylko HTTPS. Utwórz go na hoście poleceniem \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".",
+	"Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.": "Logowanie WWW: poświadczenie „Login i hasło” (np. root@pam). Token API: poświadczenie typu „Klucz”.",
+	"API token": "Token API",
+	"Shown only once when it is created on the host. Stored encrypted.": "Wyświetlany tylko raz przy tworzeniu na hoście. Przechowywany w postaci zaszyfrowanej."
 }

@@ -45,6 +45,9 @@ class UltimateUpdater extends utils.Adapter {
 		this.unsubscribeCredential = null;
 		/** object id → JSON of the last written common (avoids rewriting objects) */
 		this.objCache = new Map();
+		this.noLogPermission = false;
+		/** jobs whose log could not be fetched (not retried) */
+		this.logUnavailable = new Set();
 		/** running collective update: { stop } – null if none */
 		this.bulk = null;
 	}
@@ -64,12 +67,25 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 		try {
-			this.client = new UuClient({ ...this.config, username: cred.login, password: cred.password });
+			this.client = new UuClient({
+				...this.config,
+				username: cred.login,
+				password: cred.password,
+				token: cred.token,
+			});
+			this.log.info(
+				this.client.tokenMode
+					? "Using the Ultimate Updater integration API v1 (API token)"
+					: "Using the Ultimate Updater Web UI login",
+			);
 		} catch (e) {
 			this.log.error(`Invalid address "${this.config.ip}:${this.config.port}": ${e.message}`);
 			return;
 		}
 
+		if (this.config.authMode === "token" && this.config.https === false) {
+			this.log.warn('The integration API (API token) only works over HTTPS – please enable "Use HTTPS".');
+		}
 		if (!this.config.validateCertificate && this.config.https !== false) {
 			this.log.info(
 				"The TLS certificate of the Ultimate Updater Web UI is not validated (see settings) – use this only in a trusted network.",
@@ -104,9 +120,10 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Login data from the settings or from the central credentials manager (admin ≥ 7.9).
 	 *
-	 * @returns {Promise<{login: string, password: string} | null>} login data or null if not usable
+	 * @returns {Promise<{login?: string, password?: string, token?: string} | null>} login data or null if not usable
 	 */
 	async resolveCredentials() {
+		const tokenMode = this.config.authMode === "token";
 		if (this.config.credentialMode === "manager") {
 			if (!Credentials || !Credentials.getCredentials) {
 				this.log.error(
@@ -120,6 +137,16 @@ class UltimateUpdater extends utils.Adapter {
 			}
 			try {
 				const c = await Credentials.getCredentials(this, this.config.credentialId);
+				if (tokenMode) {
+					const token = String(c.values.key || "");
+					if (!token) {
+						this.log.error(
+							`Credential "${this.config.credentialId}" has no key – for the API token please select a "Key" credential.`,
+						);
+						return null;
+					}
+					return { token };
+				}
 				const login = String(c.values.login || "");
 				const password = String(c.values.password || "");
 				if (!login || !password) {
@@ -133,6 +160,13 @@ class UltimateUpdater extends utils.Adapter {
 				this.log.error(`Cannot read credential "${this.config.credentialId}": ${e.message}`);
 				return null;
 			}
+		}
+		if (tokenMode) {
+			if (!this.config.apiToken) {
+				this.log.error("Please enter the API token of Ultimate Updater in the adapter settings.");
+				return null;
+			}
+			return { token: this.config.apiToken };
 		}
 		if (!this.config.username || !this.config.password) {
 			this.log.error("Please configure user name and password of the Ultimate Updater Web UI.");
@@ -155,7 +189,11 @@ class UltimateUpdater extends utils.Adapter {
 					}
 					this.log.info(`Credential ${id} was changed, logging in again`);
 					if (this.client) {
-						this.client.setCredentials(cred.values.login, cred.values.password);
+						if (this.config.authMode === "token") {
+							this.client.setToken(cred.values.key);
+						} else {
+							this.client.setCredentials(cred.values.login, cred.values.password);
+						}
 					}
 					this.refreshStatus();
 				},
@@ -447,6 +485,20 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
+	 * Shut down guest? Web UI status has "status"; API v1 reports it via skip_reason/check_status.
+	 *
+	 * @param {any} t - target
+	 * @returns {boolean} true if the VM/CT is shut down
+	 */
+	isStopped(t) {
+		return (
+			t.status === "stopped" ||
+			t.check_status === "stopped" ||
+			(!!t.skip_reason && /STOPPED/.test(String(t.skip_reason.code || "")))
+		);
+	}
+
+	/**
 	 * @param {any} t - target
 	 * @returns {boolean} excluded from the collective update buttons
 	 */
@@ -598,14 +650,23 @@ class UltimateUpdater extends utils.Adapter {
 			} else if (this.objCache.has(`${prefix}.cancel`) || (await this.getObjectAsync(`${prefix}.cancel`))) {
 				await this.removeObject(`${prefix}.cancel`);
 			}
-			if (FAILURE_STATES.includes(j.state)) {
+			if (FAILURE_STATES.includes(j.state) && !this.noLogPermission && !this.logUnavailable.has(j.unit)) {
 				const logState = await this.getStateAsync(`${prefix}.log`);
 				if (!logState || !logState.val) {
 					try {
 						const log = await this.api().getJobLog(j.unit);
 						await this.value(`${prefix}.log`, "Log (last lines of a failed job)", log);
 					} catch (e) {
-						this.log.warn(`Log of job ${j.unit} not available: ${e.message}`);
+						if (e.status === 403) {
+							// API token without "logs" permission: tell once, do not retry on every poll
+							this.noLogPermission = true;
+							this.log.info(
+								'The API token has no "logs" permission – logs of failed jobs are not fetched.',
+							);
+						} else {
+							this.logUnavailable.add(j.unit); // try once per job and adapter run
+							this.log.warn(`Log of job ${j.unit} not available: ${e.message}`);
+						}
 					}
 				}
 			}
@@ -894,7 +955,7 @@ class UltimateUpdater extends utils.Adapter {
 			// "running" (default): shut down VMs/CTs are skipped – Ultimate Updater only updates them
 			// if STOPPED_CONTAINER/STOPPED_VM is enabled in its update.conf, otherwise the job fails
 			const onlyRunning = this.config.bulkTargets !== "all";
-			const list = onlyRunning ? candidates.filter(t => t.status !== "stopped") : candidates;
+			const list = onlyRunning ? candidates.filter(t => !this.isStopped(t)) : candidates;
 			stoppedSkipped = candidates.length - list.length;
 			this.log.info(
 				`${label}: ${list.length} targets, one after the other (hosts and excluded targets skipped${stoppedSkipped ? `, ${stoppedSkipped} shut down VMs/CTs skipped` : ""})`,

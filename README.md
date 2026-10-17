@@ -24,13 +24,22 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 ### Requirements
 
 - Ultimate Updater **5.1.3 or newer** with the Web UI enabled (default port `8765`)
-- A Proxmox account for the Web UI login (e.g. `root`, realm `pam`). Ultimate Updater only accepts accounts with full **Administrator** privileges at `/` and **without two-factor authentication**.
+- One of two ways to authenticate:
+  - **API token (recommended, Ultimate Updater 5.2 / currently the `develop` branch):** the integration API v1 with a bearer token and its own permissions. HTTPS only. On the Proxmox host:
+    ```bash
+    ultimate-updater-api-token enable
+    ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel
+    ```
+    The token is shown only once. Leave out permissions you do not want to grant (e.g. `read,logs,check` for status and checks only); the matching buttons then report "permission denied".
+  - **Web UI login:** a Proxmox account (e.g. `root`, realm `pam`). Ultimate Updater only accepts accounts with full **Administrator** privileges at `/` and **without two-factor authentication**.
 
 ### Configuration
 
 | Setting | Description |
 |---|---|
 | IP address / host name, Port, Use HTTPS | Address of the Ultimate Updater Web UI |
+| Authentication | **Web UI login** (Proxmox user) or **API token** (integration API v1, Ultimate Updater 5.2+, HTTPS only) |
+| API token | Only for "API token" + "enter here". Stored encrypted. With the credentials manager, select a "Key" credential instead. |
 | Login data | **Enter here** (user name and password in the adapter settings) or **from the credentials manager** of the admin (Settings → Credentials, needs admin 7.9 and js-controller 7.2.2 or newer). With the credentials manager you select a "Login & password" credential; changes to it are used immediately without restarting the adapter. |
 | Username / Password | Only for "enter here": Proxmox user name **without** `@realm` (e.g. `root`) and password. `root@pam` is split automatically. The password is stored encrypted. |
 | Realm | Authentication domain as shown on the Web UI login, e.g. `pam` or `pve` |
@@ -91,7 +100,7 @@ Please be aware of what the current Web UI login means:
 - The adapter does **not validate the TLS certificate** by default, because the Web UI normally uses the self-signed Proxmox certificate. Without validation the connection is encrypted, but a man-in-the-middle in your network could intercept the login. Enable *Validate TLS certificate* if the Web UI uses a trusted certificate, and run the adapter only in a trusted network.
 - Restrict access to the Ultimate Updater Web UI port to the hosts that need it (e.g. firewall rules).
 
-A dedicated token API with separate permissions (read / check / update / reboot) is being discussed upstream; the adapter will use it as soon as it exists.
+With Ultimate Updater 5.2 the **API token** avoids all of this: it does not grant any Proxmox login, it only works over HTTPS and it carries exactly the permissions you give it (`read`, `logs`, `check`, `update`, `reboot`, `cancel`). Revoke it on the host with `ultimate-updater-api-token revoke <id>`.
 
 ### Note on the API
 
@@ -108,6 +117,7 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 * (ipod86) collective updates run one target after the other (waiting for each job), progress in `bulk.*`
 * (ipod86) clearer description of the security update button; security notes in the README
 * (ipod86) setting whether collective updates include shut down VMs/CTs (default: only running ones)
+* (ipod86) authentication with an API token via the integration API v1 of Ultimate Updater 5.2 (Web UI login stays available)
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

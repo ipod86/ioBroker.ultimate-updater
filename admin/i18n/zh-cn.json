@@ -32,9 +32,15 @@
 	"From the credentials manager (admin settings)": "来自凭据管理器（admin 设置）",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "凭据管理器需要 admin 7.9 和 js-controller 7.2.2 或更高版本",
 	"Proxmox login": "Proxmox 登录",
-	"A \"Login & password\" credential, e.g. root@pam": "“登录名和密码”类型的凭据，例如 root@pam",
 	"Collective updates include": "批量更新包括",
 	"Only running VMs/CTs": "仅正在运行的虚拟机/容器",
 	"All VMs/CTs (also shut down ones)": "所有虚拟机/容器（包括已关闭的）",
-	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "只有在 Ultimate Updater 中也启用了更新已停止客户机（update.conf 中的 STOPPED_CONTAINER / STOPPED_VM）时，“全部”才有效——它会为更新启动它们，然后再次关闭。否则 Ultimate Updater 会跳过它们，任务失败。"
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "只有在 Ultimate Updater 中也启用了更新已停止客户机（update.conf 中的 STOPPED_CONTAINER / STOPPED_VM）时，“全部”才有效——它会为更新启动它们，然后再次关闭。否则 Ultimate Updater 会跳过它们，任务失败。",
+	"Authentication": "身份验证",
+	"Web UI login (Proxmox user)": "网页界面登录（Proxmox 用户）",
+	"API token (integration API v1)": "API 令牌（集成 API v1）",
+	"API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".": "API 令牌：需要 Ultimate Updater 5.2 或更高版本，仅限 HTTPS。在主机上使用 \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\" 创建。",
+	"Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.": "网页登录：“登录名和密码”类型的凭据（例如 root@pam）。API 令牌：“密钥”类型的凭据。",
+	"API token": "API 令牌",
+	"Shown only once when it is created on the host. Stored encrypted.": "仅在主机上创建时显示一次。加密存储。"
 }

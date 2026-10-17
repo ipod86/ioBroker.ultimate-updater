@@ -196,6 +196,92 @@ tests.integration(path.join(__dirname, ".."), {
 			});
 		});
 
+		suite("With an API token (integration API v1)", getHarness => {
+			/** @type {any} */
+			let mock;
+			/** @type {any} */
+			let harness;
+			const NS = "ultimate-updater.0";
+			const wait = ms => new Promise(r => setTimeout(r, ms));
+
+			before(async function () {
+				this.timeout(60000);
+				mock = await startMock();
+				// v1 has no "status" field – a shut down CT is only visible through skip_reason
+				mock.state.targets.push({
+					id: "lxc:105",
+					name: "backup",
+					type: "lxc",
+					node: "pve",
+					status: "stopped",
+					reachable: null,
+					security_updates: null,
+					normal_updates: null,
+					reboot_required: null,
+				});
+				harness = getHarness();
+				const sys = await harness.objects.getObjectAsync("system.config");
+				const secret = String(sys.native.secret);
+				const encrypt = v =>
+					[...v]
+						.map((c, i) => String.fromCharCode(secret.charCodeAt(i % secret.length) ^ c.charCodeAt(0)))
+						.join("");
+				const obj = await harness.objects.getObjectAsync(`system.adapter.${NS}`);
+				Object.assign(obj.native, {
+					ip: "127.0.0.1",
+					port: mock.port,
+					https: false,
+					authMode: "token",
+					credentialMode: "manual",
+					apiToken: encrypt("tok-full"),
+					username: "",
+					password: "",
+					pollIdle: 5,
+					pollBusy: 1,
+					excludeTargets: [],
+				});
+				// like an install/upgrade does: encryptedNative of the instance follows io-package.json
+				obj.encryptedNative = require("../io-package.json").encryptedNative;
+				obj.protectedNative = require("../io-package.json").protectedNative;
+				await harness.objects.setObjectAsync(obj._id, obj);
+				await harness.startAdapterAndWait();
+				await wait(3000);
+			});
+			after(() => mock && mock.server.close());
+
+			it("reads the status via /api/v1 without a login", async () => {
+				expect(mock.state.logins).to.equal(0);
+				expect(mock.state.v1Calls.some(c => c[1] === "/api/v1/status")).to.equal(true);
+				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
+				expect(conn && conn.val).to.equal(true);
+				const skip = await harness.states.getStateAsync(`${NS}.targets.backup_lxc_105.skip_reason.code`);
+				expect(skip && skip.val).to.equal("STOPPED_READ_ONLY");
+			});
+
+			it("updates with confirm and skips the shut down CT in collective updates", async function () {
+				this.timeout(30000);
+				mock.state.autoCompleteMs = 1500;
+				await harness.states.setStateAsync(`${NS}.updateAllVmsCts`, true, false);
+				await wait(9000);
+				const updates = mock.state.v1Calls.filter(c => c[0] === "POST" && c[1].startsWith("/api/v1/update/"));
+				expect(updates.map(c => c[1])).to.deep.equal(["/api/v1/update/lxc%3A101", "/api/v1/update/lxc%3A103"]);
+				expect(updates.every(c => c[2] && c[2].confirm === true)).to.equal(true);
+				const progress = await harness.states.getStateAsync(`${NS}.bulk.progress`);
+				expect(progress && progress.val).to.equal("2 ok, 0 failed, 0 not started, 1 shut down skipped");
+			});
+
+			it("checks a host via check-node with an empty body", async () => {
+				await harness.states.setStateAsync(`${NS}.targets.pve_host_pve.checkNow`, true, false);
+				await wait(1500);
+				expect(mock.state.v1Calls).to.deep.include(["POST", "/api/v1/check-node/pve", {}]);
+			});
+
+			it("stops", async function () {
+				this.timeout(10000);
+				await harness.stopAdapter();
+			});
+		});
+
 		suite("With login data from the credentials manager", getHarness => {
 			/** @type {any} */
 			let mock;

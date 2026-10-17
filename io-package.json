@@ -89,10 +89,12 @@
 		"ip": "192.168.1.10",
 		"port": 8765,
 		"https": true,
+		"authMode": "webui",
 		"credentialMode": "manual",
 		"credentialId": "",
 		"username": "root",
 		"password": "",
+		"apiToken": "",
 		"realm": "pam",
 		"validateCertificate": false,
 		"refreshInterval": 60,
@@ -131,10 +133,12 @@
 		}
 	],
 	"encryptedNative": [
-		"password"
+		"password",
+		"apiToken"
 	],
 	"protectedNative": [
-		"password"
+		"password",
+		"apiToken"
 	],
 	"notifications": [
 		{

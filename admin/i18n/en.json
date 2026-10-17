@@ -32,9 +32,15 @@
 	"From the credentials manager (admin settings)": "From the credentials manager (admin settings)",
 	"The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer": "The credentials manager needs admin 7.9 and js-controller 7.2.2 or newer",
 	"Proxmox login": "Proxmox login",
-	"A \"Login & password\" credential, e.g. root@pam": "A \"Login & password\" credential, e.g. root@pam",
 	"Collective updates include": "Collective updates include",
 	"Only running VMs/CTs": "Only running VMs/CTs",
 	"All VMs/CTs (also shut down ones)": "All VMs/CTs (also shut down ones)",
-	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails."
+	"\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.": "\"All\" only works if updating stopped guests is enabled in Ultimate Updater as well (STOPPED_CONTAINER / STOPPED_VM in update.conf) – it then starts them for the update and shuts them down again. Otherwise Ultimate Updater skips them and the job fails.",
+	"Authentication": "Authentication",
+	"Web UI login (Proxmox user)": "Web UI login (Proxmox user)",
+	"API token (integration API v1)": "API token (integration API v1)",
+	"API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".": "API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".",
+	"Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.": "Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.",
+	"API token": "API token",
+	"Shown only once when it is created on the host. Stored encrypted.": "Shown only once when it is created on the host. Stored encrypted."
 }

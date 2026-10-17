@@ -24,13 +24,22 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 ### Voraussetzungen
 
 - Ultimate Updater **5.1.3 oder neuer** mit aktivierter Web-UI (Standardport `8765`)
-- Ein Proxmox-Konto für den Web-UI-Login (z. B. `root`, Realm `pam`). Der Ultimate Updater akzeptiert nur Konten mit vollen **Administrator**-Rechten auf `/` und **ohne Zwei-Faktor-Authentifizierung**.
+- Eine von zwei Anmeldearten:
+  - **API-Token (empfohlen, Ultimate Updater 5.2 / derzeit der `develop`-Zweig):** die Integrations-API v1 mit Bearer-Token und eigenen Rechten. Nur über HTTPS. Auf dem Proxmox-Host:
+    ```bash
+    ultimate-updater-api-token enable
+    ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel
+    ```
+    Der Token wird nur einmal angezeigt. Rechte, die du nicht vergeben willst, lässt du weg (z. B. `read,logs,check` nur für Status und Prüfungen); die zugehörigen Buttons melden dann „keine Berechtigung“.
+  - **Web-UI-Login:** ein Proxmox-Konto (z. B. `root`, Realm `pam`). Der Ultimate Updater akzeptiert nur Konten mit vollen **Administrator**-Rechten auf `/` und **ohne Zwei-Faktor-Authentifizierung**.
 
 ### Konfiguration
 
 | Einstellung | Beschreibung |
 |---|---|
 | IP-Adresse / Hostname, Port, HTTPS verwenden | Adresse der Ultimate-Updater-Weboberfläche |
+| Anmeldung | **Web-UI-Login** (Proxmox-Benutzer) oder **API-Token** (Integrations-API v1, Ultimate Updater 5.2+, nur HTTPS) |
+| API-Token | Nur bei „API-Token“ + „Hier eingeben“. Wird verschlüsselt gespeichert. Mit dem Credentials-Manager stattdessen einen Eintrag vom Typ „Key“ wählen. |
 | Zugangsdaten | **Hier eingeben** (Benutzer und Passwort in den Adapter-Einstellungen) oder **aus dem Credentials-Manager** des Admin (Einstellungen → Credentials, benötigt Admin 7.9 und js-controller 7.2.2 oder neuer). Beim Credentials-Manager wählt man einen Eintrag vom Typ „Login & Passwort“; Änderungen daran werden sofort ohne Neustart des Adapters übernommen. |
 | Benutzername / Passwort | Nur bei „Hier eingeben“: Proxmox-Benutzer **ohne** `@Realm` (z. B. `root`) und Passwort. `root@pam` wird automatisch aufgeteilt. Das Passwort wird verschlüsselt gespeichert. |
 | Anmeldedomäne (Realm) | Wie im Web-UI-Login, z. B. `pam` oder `pve` |
@@ -91,7 +100,7 @@ Bitte beachte, was der aktuelle Web-UI-Login bedeutet:
 - Der Adapter **prüft das TLS-Zertifikat standardmäßig nicht**, weil die Web-UI normalerweise das selbstsignierte Proxmox-Zertifikat verwendet. Die Verbindung ist dann zwar verschlüsselt, ein Angreifer im eigenen Netz könnte den Login aber abfangen (Man-in-the-Middle). Aktiviere *TLS-Zertifikat validieren*, wenn die Web-UI ein vertrauenswürdiges Zertifikat nutzt, und betreibe den Adapter nur in einem vertrauenswürdigen Netz.
 - Beschränke den Zugriff auf den Port der Ultimate-Updater-Web-UI auf die Systeme, die ihn brauchen (z. B. per Firewall).
 
-Eine eigene Token-API mit getrennten Rechten (lesen / prüfen / aktualisieren / neu starten) wird upstream besprochen; der Adapter nutzt sie, sobald es sie gibt.
+Mit Ultimate Updater 5.2 umgeht der **API-Token** all das: Er gewährt keinen Proxmox-Login, funktioniert nur über HTTPS und hat genau die Rechte, die du ihm gibst (`read`, `logs`, `check`, `update`, `reboot`, `cancel`). Entziehen kannst du ihn auf dem Host mit `ultimate-updater-api-token revoke <id>`.
 
 ### Hinweis zur API
 
@@ -108,6 +117,7 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 * (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
 * (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README
 * (ipod86) Einstellung, ob Sammel-Updates auch ausgeschaltete VMs/CTs umfassen (Standard: nur laufende)
+* (ipod86) Anmeldung per API-Token über die Integrations-API v1 von Ultimate Updater 5.2 (Web-UI-Login bleibt verfügbar)
 
 Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
