@@ -17,7 +17,7 @@ describe("UuClient", () => {
 	it("logs in with separate realm and reads the status", async () => {
 		const c = new UuClient({ ip: "127.0.0.1", port: mock.port, https: false, username: "root", password: "secret", realm: "pam" });
 		const status = await c.getStatus();
-		expect(status.targets).to.have.length(2);
+		expect(status.targets).to.have.length(3);
 		expect(mock.state.lastLogin).to.deep.equal({ username: "root", password: "secret", realm: "pam" });
 	});
 

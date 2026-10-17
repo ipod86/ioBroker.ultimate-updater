@@ -83,7 +83,8 @@
 			{
 				"admin": ">=7.6.20"
 			}
-		]
+		],
+		"messagebox": true
 	},
 	"native": {
 		"ip": "192.168.1.10",
@@ -95,7 +96,13 @@
 		"validateCertificate": false,
 		"refreshInterval": 60,
 		"pollIdle": 30,
-		"pollBusy": 2
+		"pollBusy": 2,
+		"deleteStaleTargets": true,
+		"excludeTargets": [],
+		"allowReboot": false,
+		"notifySecurity": true,
+		"notifyReboot": true,
+		"notifyJobFailed": true
 	},
 	"objects": [],
 	"instanceObjects": [
@@ -126,5 +133,134 @@
 	],
 	"protectedNative": [
 		"password"
+	],
+	"notifications": [
+		{
+			"scope": "ultimate-updater",
+			"name": {
+				"en": "Ultimate Updater",
+				"de": "Ultimate Updater",
+				"ru": "Ultimate Updater",
+				"pt": "Ultimate Updater",
+				"nl": "Ultimate Updater",
+				"fr": "Ultimate Updater",
+				"it": "Ultimate Updater",
+				"es": "Ultimate Updater",
+				"pl": "Ultimate Updater",
+				"uk": "Ultimate Updater",
+				"zh-cn": "Ultimate Updater"
+			},
+			"description": {
+				"en": "Update notifications from ioBroker.ultimate-updater",
+				"de": "Update-Benachrichtigungen von ioBroker.ultimate-updater",
+				"ru": "Уведомления об обновлениях от ioBroker.ultimate-updater",
+				"pt": "Notificações de atualização do ioBroker.ultimate-updater",
+				"nl": "Updatemeldingen van ioBroker.ultimate-updater",
+				"fr": "Notifications de mise à jour de ioBroker.ultimate-updater",
+				"it": "Notifiche di aggiornamento da ioBroker.ultimate-updater",
+				"es": "Notificaciones de actualización de ioBroker.ultimate-updater",
+				"pl": "Powiadomienia o aktualizacjach z ioBroker.ultimate-updater",
+				"uk": "Сповіщення про оновлення від ioBroker.ultimate-updater",
+				"zh-cn": "来自 ioBroker.ultimate-updater 的更新通知"
+			},
+			"categories": [
+				{
+					"category": "securityUpdates",
+					"name": {
+						"en": "New security updates",
+						"de": "Neue Sicherheitsupdates",
+						"ru": "Новые обновления безопасности",
+						"pt": "Novas atualizações de segurança",
+						"nl": "Nieuwe beveiligingsupdates",
+						"fr": "Nouvelles mises à jour de sécurité",
+						"it": "Nuovi aggiornamenti di sicurezza",
+						"es": "Nuevas actualizaciones de seguridad",
+						"pl": "Nowe aktualizacje bezpieczeństwa",
+						"uk": "Нові оновлення безпеки",
+						"zh-cn": "新的安全更新"
+					},
+					"severity": "notify",
+					"description": {
+						"en": "A host, VM or container has new security updates",
+						"de": "Ein Host, eine VM oder ein Container hat neue Sicherheitsupdates",
+						"ru": "У хоста, ВМ или контейнера появились новые обновления безопасности",
+						"pt": "Um host, VM ou contêiner tem novas atualizações de segurança",
+						"nl": "Een host, VM of container heeft nieuwe beveiligingsupdates",
+						"fr": "Un hôte, une VM ou un conteneur a de nouvelles mises à jour de sécurité",
+						"it": "Un host, una VM o un container ha nuovi aggiornamenti di sicurezza",
+						"es": "Un host, VM o contenedor tiene nuevas actualizaciones de seguridad",
+						"pl": "Host, maszyna wirtualna lub kontener ma nowe aktualizacje bezpieczeństwa",
+						"uk": "Хост, ВМ або контейнер має нові оновлення безпеки",
+						"zh-cn": "主机、虚拟机或容器有新的安全更新"
+					},
+					"regex": [],
+					"limit": 10
+				},
+				{
+					"category": "rebootRequired",
+					"name": {
+						"en": "Reboot required",
+						"de": "Neustart erforderlich",
+						"ru": "Требуется перезагрузка",
+						"pt": "Reinício necessário",
+						"nl": "Herstart vereist",
+						"fr": "Redémarrage nécessaire",
+						"it": "Riavvio necessario",
+						"es": "Reinicio necesario",
+						"pl": "Wymagany restart",
+						"uk": "Потрібне перезавантаження",
+						"zh-cn": "需要重启"
+					},
+					"severity": "notify",
+					"description": {
+						"en": "A host, VM or container needs a reboot after updates",
+						"de": "Ein Host, eine VM oder ein Container muss nach Updates neu gestartet werden",
+						"ru": "Хосту, ВМ или контейнеру нужна перезагрузка после обновлений",
+						"pt": "Um host, VM ou contêiner precisa ser reiniciado após atualizações",
+						"nl": "Een host, VM of container moet na updates opnieuw worden opgestart",
+						"fr": "Un hôte, une VM ou un conteneur doit être redémarré après des mises à jour",
+						"it": "Un host, una VM o un container deve essere riavviato dopo gli aggiornamenti",
+						"es": "Un host, VM o contenedor necesita reiniciarse tras las actualizaciones",
+						"pl": "Host, maszyna wirtualna lub kontener wymaga restartu po aktualizacjach",
+						"uk": "Хост, ВМ або контейнер потребує перезавантаження після оновлень",
+						"zh-cn": "主机、虚拟机或容器在更新后需要重启"
+					},
+					"regex": [],
+					"limit": 10
+				},
+				{
+					"category": "jobFailed",
+					"name": {
+						"en": "Job failed",
+						"de": "Job fehlgeschlagen",
+						"ru": "Задание не выполнено",
+						"pt": "Tarefa falhou",
+						"nl": "Taak mislukt",
+						"fr": "Tâche échouée",
+						"it": "Job non riuscito",
+						"es": "Tarea fallida",
+						"pl": "Zadanie nie powiodło się",
+						"uk": "Завдання не виконано",
+						"zh-cn": "任务失败"
+					},
+					"severity": "alert",
+					"description": {
+						"en": "A check, update or reboot job of Ultimate Updater failed or was interrupted",
+						"de": "Ein Prüf-, Update- oder Neustart-Job des Ultimate Updater ist fehlgeschlagen oder wurde abgebrochen",
+						"ru": "Задание проверки, обновления или перезагрузки Ultimate Updater не выполнено или прервано",
+						"pt": "Uma tarefa de verificação, atualização ou reinício do Ultimate Updater falhou ou foi interrompida",
+						"nl": "Een controle-, update- of herstarttaak van Ultimate Updater is mislukt of onderbroken",
+						"fr": "Une tâche de vérification, de mise à jour ou de redémarrage d'Ultimate Updater a échoué ou a été interrompue",
+						"it": "Un job di controllo, aggiornamento o riavvio di Ultimate Updater non è riuscito o è stato interrotto",
+						"es": "Una tarea de comprobación, actualización o reinicio de Ultimate Updater falló o se interrumpió",
+						"pl": "Zadanie sprawdzenia, aktualizacji lub restartu Ultimate Updater nie powiodło się lub zostało przerwane",
+						"uk": "Завдання перевірки, оновлення або перезавантаження Ultimate Updater не виконано або перервано",
+						"zh-cn": "Ultimate Updater 的检查、更新或重启任务失败或被中断"
+					},
+					"regex": [],
+					"limit": 10
+				}
+			]
+		}
 	]
 }

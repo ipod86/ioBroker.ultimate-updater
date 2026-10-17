@@ -32,6 +32,8 @@ tests.integration(path.join(__dirname, ".."), {
 					realm: "",
 					pollIdle: 5,
 					pollBusy: 1,
+					excludeTargets: ["lxc:103"],
+					allowReboot: true,
 				});
 				await harness.objects.setObjectAsync(obj._id, obj);
 				await harness.startAdapterAndWait();
@@ -53,7 +55,11 @@ tests.integration(path.join(__dirname, ".."), {
 				const reach = await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.reachable`);
 				expect(reach && reach.common.role).to.equal("indicator.reachable");
 				const total = await harness.states.getStateAsync(`${NS}.summary.securityUpdatesTotal`);
-				expect(total && total.val).to.equal(2);
+				expect(total && total.val).to.equal(3);
+				const text = await harness.states.getStateAsync(`${NS}.summary.text`);
+				expect(text && text.val).to.equal("9 updates on 3 systems, 1 reboot required");
+				const jobState = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.jobState`);
+				expect(jobState && jobState.val).to.equal("none");
 				const reboot = await harness.states.getStateAsync(`${NS}.summary.rebootRequiredList`);
 				expect(reboot && reboot.val).to.equal('["pve"]');
 			});
@@ -75,6 +81,50 @@ tests.integration(path.join(__dirname, ".."), {
 				await harness.states.setStateAsync(`${NS}.targets.pve_host_pve.updateNow`, true, false);
 				await wait(1500);
 				expect(mock.state.actions).to.deep.include(["update-node", "pve"]);
+			});
+
+			it("creates a reboot button only for targets that need a reboot", async () => {
+				expect(await harness.objects.getObjectAsync(`${NS}.targets.pve_host_pve.reboot`)).to.be.ok;
+				expect(await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.reboot`)).to.not.be.ok;
+				await harness.states.setStateAsync(`${NS}.targets.pve_host_pve.reboot`, true, false);
+				await wait(1500);
+				expect(mock.state.actions).to.deep.include(["reboot", "host:pve"]);
+			});
+
+			it("skips excluded targets when updating all VMs/CTs", async () => {
+				mock.state.actions.length = 0;
+				await harness.states.setStateAsync(`${NS}.updateAllVmsCts`, true, false);
+				await wait(1500);
+				expect(mock.state.actions).to.deep.include(["update", "lxc:101"]);
+				expect(mock.state.actions).to.not.deep.include(["update", "lxc:103"]);
+			});
+
+			it("shows a running job at the target and cancels it", async function () {
+				this.timeout(20000);
+				mock.state.startJobOnUpdate = true;
+				await harness.states.setStateAsync(`${NS}.targets.web_lxc_101.updateNow`, true, false);
+				await wait(2500);
+				const jobState = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.jobState`);
+				expect(jobState && jobState.val).to.equal("running");
+				const running = await harness.states.getStateAsync(`${NS}.jobRunning`);
+				expect(running && running.val).to.equal(true);
+				expect(await harness.objects.getObjectAsync(`${NS}.jobs.uu_2.cancel`)).to.be.ok;
+
+				// target deleted in Proxmox meanwhile → removed on the refresh after the job ended
+				mock.state.targets = mock.state.targets.filter(t => t.id !== "lxc:103");
+				await harness.states.setStateAsync(`${NS}.jobs.uu_2.cancel`, true, false);
+				await wait(4000);
+				expect(mock.state.actions).to.deep.include(["cancel", "uu-2"]);
+				const after = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.jobState`);
+				expect(after && after.val).to.equal("interrupted");
+				expect(await harness.objects.getObjectAsync(`${NS}.jobs.uu_2.cancel`)).to.not.be.ok;
+			});
+
+			it("notifies the interrupted job once and removes the deleted target", async () => {
+				const ns = await harness.states.getStateAsync(`${NS}.info.notifyState`);
+				const notified = JSON.parse(String(ns && ns.val));
+				expect(notified.jobs).to.include("uu-2");
+				expect(await harness.objects.getObjectAsync(`${NS}.targets.db_lxc_103`)).to.not.be.ok;
 			});
 
 			it("logs out when the adapter stops", async function () {

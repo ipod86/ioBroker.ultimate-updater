@@ -14,5 +14,17 @@
 	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Adresse der Ultimate-Updater-Weboberfläche, z. B. 192.168.1.10",
 	"Port": "Port",
 	"Web UI port, default 8765": "Port der Weboberfläche, Standard 8765",
-	"Use HTTPS": "HTTPS verwenden"
+	"Use HTTPS": "HTTPS verwenden",
+	"Updates and actions": "Updates und Aktionen",
+	"Excluded from \"update all\"": "Ausgenommen von „Alle aktualisieren“",
+	"These VMs/CTs are skipped by the collective update buttons. They can still be updated individually. The list is loaded from the running instance.": "Diese VMs/CTs werden von den Sammel-Update-Buttons übersprungen. Einzeln lassen sie sich weiterhin aktualisieren. Die Liste wird von der laufenden Instanz geladen.",
+	"Allow reboot buttons": "Neustart-Buttons erlauben",
+	"Creates a reboot button for hosts/VMs/CTs that need a reboot. Off by default.": "Legt für Hosts/VMs/CTs, die einen Neustart brauchen, einen Neustart-Button an. Standardmäßig aus.",
+	"Delete targets that no longer exist": "Nicht mehr vorhandene Targets löschen",
+	"Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). If off, they are kept.": "Entfernt die Datenpunkte von Hosts/VMs/CTs, die Ultimate Updater nicht mehr meldet (z. B. in Proxmox gelöscht). Ist die Option aus, bleiben sie erhalten.",
+	"Notifications": "Benachrichtigungen",
+	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "Versand über den ioBroker Notification Manager (Telegram, E-Mail, … werden dort eingerichtet). Gemeldet werden nur Änderungen.",
+	"New security updates": "Neue Sicherheitsupdates",
+	"Reboot required": "Neustart erforderlich",
+	"Job failed or interrupted": "Job fehlgeschlagen oder abgebrochen"
 }

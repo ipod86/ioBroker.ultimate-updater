@@ -14,5 +14,17 @@
 	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Адрес веб-интерфейса Ultimate Updater, напр. 192.168.1.10",
 	"Port": "Порт",
 	"Web UI port, default 8765": "Порт веб-интерфейса, по умолчанию 8765",
-	"Use HTTPS": "Использовать HTTPS"
+	"Use HTTPS": "Использовать HTTPS",
+	"Updates and actions": "Обновления и действия",
+	"Excluded from \"update all\"": "Исключено из «обновить всё»",
+	"These VMs/CTs are skipped by the collective update buttons. They can still be updated individually. The list is loaded from the running instance.": "Эти ВМ/контейнеры пропускаются кнопками массового обновления. По отдельности их можно обновлять. Список загружается из работающего экземпляра.",
+	"Allow reboot buttons": "Разрешить кнопки перезагрузки",
+	"Creates a reboot button for hosts/VMs/CTs that need a reboot. Off by default.": "Создаёт кнопку перезагрузки для хостов/ВМ/контейнеров, которым нужна перезагрузка. По умолчанию выключено.",
+	"Delete targets that no longer exist": "Удалять несуществующие цели",
+	"Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). If off, they are kept.": "Удаляет состояния хостов/ВМ/контейнеров, о которых Ultimate Updater больше не сообщает (например, удалены в Proxmox). Если выключено, они сохраняются.",
+	"Notifications": "Уведомления",
+	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "Отправка через менеджер уведомлений ioBroker (Telegram, e-mail и др. настраиваются там). Сообщается только об изменениях.",
+	"New security updates": "Новые обновления безопасности",
+	"Reboot required": "Требуется перезагрузка",
+	"Job failed or interrupted": "Задание не выполнено или прервано"
 }

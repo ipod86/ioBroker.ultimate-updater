@@ -14,5 +14,17 @@
 	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Ultimate Updater 网页界面地址，例如 192.168.1.10",
 	"Port": "端口",
 	"Web UI port, default 8765": "网页界面端口，默认 8765",
-	"Use HTTPS": "使用 HTTPS"
+	"Use HTTPS": "使用 HTTPS",
+	"Updates and actions": "更新与操作",
+	"Excluded from \"update all\"": "从“全部更新”中排除",
+	"These VMs/CTs are skipped by the collective update buttons. They can still be updated individually. The list is loaded from the running instance.": "这些虚拟机/容器会被批量更新按钮跳过，但仍可单独更新。列表从正在运行的实例加载。",
+	"Allow reboot buttons": "允许重启按钮",
+	"Creates a reboot button for hosts/VMs/CTs that need a reboot. Off by default.": "为需要重启的主机/虚拟机/容器创建重启按钮。默认关闭。",
+	"Delete targets that no longer exist": "删除已不存在的目标",
+	"Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). If off, they are kept.": "删除 Ultimate Updater 不再报告的主机/虚拟机/容器的状态（例如已在 Proxmox 中删除）。关闭时将保留。",
+	"Notifications": "通知",
+	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "通过 ioBroker 通知管理器发送（Telegram、电子邮件等在那里配置）。仅通知变化。",
+	"New security updates": "新的安全更新",
+	"Reboot required": "需要重启",
+	"Job failed or interrupted": "任务失败或中断"
 }

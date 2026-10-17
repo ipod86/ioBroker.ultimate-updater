@@ -10,6 +10,7 @@
 
 const utils = require("@iobroker/adapter-core");
 const { UuClient, BUSY_STATES, FAILURE_STATES } = require("./lib/uu-client");
+const { texts } = require("./lib/i18n");
 
 const MAX_TIMEOUT_S = 2147483; // setTimeout limit (~24.8 days)
 
@@ -25,6 +26,7 @@ class UltimateUpdater extends utils.Adapter {
 		this.on("ready", this.onReady.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
 		this.on("unload", this.onUnload.bind(this));
+		this.on("message", this.onMessage.bind(this));
 
 		this.client = null;
 		this.refreshTimer = null;
@@ -34,6 +36,10 @@ class UltimateUpdater extends utils.Adapter {
 		/** target key → target data of the last refresh */
 		this.targets = new Map();
 		this.unloading = false;
+		this.T = texts("en");
+		/** last notified state (null = first run) */
+		this.notified = null;
+		this.notifiedJobsInitialised = false;
 	}
 
 	/**
@@ -53,7 +59,16 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 
+		const sys = await this.getForeignObjectAsync("system.config");
+		this.T = texts((sys && sys.common && sys.common.language) || "en");
+
 		await this.createStaticObjects();
+		const ns = await this.getStateAsync("info.notifyState");
+		try {
+			this.notified = ns && ns.val ? JSON.parse(String(ns.val)) : null;
+		} catch {
+			this.notified = null;
+		}
 		this.subscribeStates("*");
 
 		await this.refreshStatus();
@@ -202,6 +217,110 @@ class UltimateUpdater extends utils.Adapter {
 		}
 	}
 
+	// ── notifications ────────────────────────────────────────────────────────
+
+	/**
+	 * Sends a notification via the ioBroker notification manager.
+	 *
+	 * @param {"securityUpdates" | "jobFailed" | "rebootRequired"} category - notification category
+	 * @param {string} msg - text in the system language
+	 */
+	async notify(category, msg) {
+		this.log.info(`Notification (${category}): ${msg}`);
+		try {
+			await this.registerNotification("ultimate-updater", category, msg);
+		} catch (e) {
+			this.log.warn(`Notification could not be sent: ${e.message}`);
+		}
+	}
+
+	/** Persists what has been notified, so a restart does not repeat notifications. */
+	async saveNotified() {
+		await this.setStateChangedAsync("info.notifyState", JSON.stringify(this.notified), true);
+	}
+
+	/**
+	 * Notifies new security updates and new reboot requirements (only on changes).
+	 *
+	 * @param {any[]} targets - targets from /api/status
+	 */
+	async notifyTargets(targets) {
+		const first = !this.notified;
+		const prev = this.notified || { sec: {}, reboot: [], jobs: [] };
+		const sec = {};
+		const reboot = [];
+		for (const t of targets) {
+			const id = String(t.id);
+			const name = t.name || id;
+			const n = Number(t.security_updates) || 0;
+			sec[id] = n;
+			if (!first && this.config.notifySecurity !== false && n > (prev.sec[id] || 0)) {
+				await this.notify("securityUpdates", this.T.security(name, n));
+			}
+			if (t.reboot_required === true) {
+				reboot.push(id);
+				if (!first && this.config.notifyReboot !== false && !prev.reboot.includes(id)) {
+					await this.notify("rebootRequired", this.T.reboot(name));
+				}
+			}
+		}
+		this.notified = { sec, reboot, jobs: prev.jobs || [] };
+		await this.saveNotified();
+	}
+
+	/**
+	 * Notifies failed/interrupted jobs once.
+	 *
+	 * @param {any[]} jobs - jobs from /api/jobs
+	 */
+	async notifyJobs(jobs) {
+		if (!this.notified) {
+			return; // first run: the status refresh initialises the state first
+		}
+		const known = new Set(this.notified.jobs || []);
+		const failed = jobs.filter(j => j && j.unit && FAILURE_STATES.includes(j.state));
+		let changed = false;
+		for (const j of failed) {
+			if (!known.has(j.unit)) {
+				// failures that already existed when the adapter started are not notified
+				if (this.config.notifyJobFailed !== false && this.notifiedJobsInitialised) {
+					await this.notify("jobFailed", this.T.jobFailed(this.targetName(j.target), j.state));
+				}
+				changed = true;
+			}
+		}
+		const units = failed.map(j => j.unit);
+		if (changed || units.length !== known.size) {
+			this.notified.jobs = units;
+			await this.saveNotified();
+		}
+		this.notifiedJobsInitialised = true;
+	}
+
+	/**
+	 * Display name of a job target ("lxc:101" → name of the target).
+	 *
+	 * @param {string} target - job target
+	 * @returns {string} name
+	 */
+	targetName(target) {
+		for (const t of this.targets.values()) {
+			if (t.id === target || `host:${t.node}` === target || (t.type === "host" && t.node === target)) {
+				return t.name || t.id;
+			}
+		}
+		return String(target || "?");
+	}
+
+	/**
+	 * @param {any} t - target
+	 * @returns {boolean} excluded from the collective update buttons
+	 */
+	isExcluded(t) {
+		const list = Array.isArray(this.config.excludeTargets) ? this.config.excludeTargets : [];
+		return list.includes(String(t.id));
+	}
+
 	// ── objects ──────────────────────────────────────────────────────────────
 
 	async createStaticObjects() {
@@ -214,6 +333,17 @@ class UltimateUpdater extends utils.Adapter {
 				name: "A check/update job is running",
 				type: "boolean",
 				role: "indicator.working",
+				read: true,
+				write: false,
+			},
+			native: {},
+		});
+		await this.extendObject("info.notifyState", {
+			type: "state",
+			common: {
+				name: "Internal: last notified state (avoids repeated notifications)",
+				type: "string",
+				role: "json",
 				read: true,
 				write: false,
 			},
@@ -292,6 +422,11 @@ class UltimateUpdater extends utils.Adapter {
 			const prefix = `jobs.${key}`;
 			await this.channel(prefix, `${j.target || j.unit} (${j.state})`);
 			await this.flatten(prefix, j);
+			if (BUSY_STATES.includes(j.state)) {
+				await this.button(`${prefix}.cancel`, "Cancel this job");
+			} else if (await this.getObjectAsync(`${prefix}.cancel`)) {
+				await this.delObjectAsync(`${prefix}.cancel`);
+			}
 			if (FAILURE_STATES.includes(j.state)) {
 				const logState = await this.getStateAsync(`${prefix}.log`);
 				if (!logState || !logState.val) {
@@ -304,6 +439,9 @@ class UltimateUpdater extends utils.Adapter {
 				}
 			}
 		}
+		await this.writeTargetJobs(jobs);
+		await this.notifyJobs(jobs);
+
 		// remove jobs that are no longer in the server's history
 		const existing = await this.getForeignObjectsAsync(`${this.namespace}.jobs.*`, "channel");
 		for (const chId of Object.keys(existing)) {
@@ -312,6 +450,31 @@ class UltimateUpdater extends utils.Adapter {
 			if (parts.length === 4 && !seen.has(key)) {
 				await this.delObjectAsync(`jobs.${key}`, { recursive: true });
 			}
+		}
+	}
+
+	/**
+	 * Latest job per target as states of the target (jobState, jobUnit).
+	 *
+	 * @param {any[]} jobs - jobs from /api/jobs
+	 */
+	async writeTargetJobs(jobs) {
+		const ts = j => Date.parse(j.started_at || j.finished_at || "") || 0;
+		for (const [key, t] of this.targets) {
+			const own = jobs.filter(
+				j =>
+					j &&
+					(j.target === t.id ||
+						(t.type === "host" && (j.target === `host:${t.node}` || j.target === t.node))),
+			);
+			own.sort((a, b) => ts(b) - ts(a));
+			const last = own[0];
+			await this.value(
+				`targets.${key}.jobState`,
+				"State of the latest job of this target",
+				last ? String(last.state) : "none",
+			);
+			await this.value(`targets.${key}.jobUnit`, "Latest job of this target", last ? String(last.unit) : "none");
 		}
 	}
 
@@ -392,6 +555,12 @@ class UltimateUpdater extends utils.Adapter {
 		await this.value("summary.unreachableList", "Unreachable targets", JSON.stringify(unreachable.map(name)), {
 			role: "json",
 		});
+		const updates = sum("security_updates") + sum("normal_updates");
+		const parts = [updates > 0 ? this.T.summary(updates, withUpdates.length) : this.T.summaryNone];
+		if (reboot.length) {
+			parts.push(this.T.summaryReboot(reboot.length));
+		}
+		await this.value("summary.text", "Summary as text", parts.join(", "));
 		await this.value("summary.rebootRequiredCount", "Targets with pending reboot", reboot.length);
 		await this.value(
 			"summary.rebootRequiredList",
@@ -427,17 +596,28 @@ class UltimateUpdater extends utils.Adapter {
 				`${prefix}.checkNow`,
 				isHost ? "Check this host (no update)" : "Check this VM/CT (no update)",
 			);
+			// reboot button only if allowed in the settings and the target actually needs a reboot
+			if (this.config.allowReboot && t.reboot_required === true && ["host", "lxc", "vm"].includes(t.type)) {
+				await this.button(`${prefix}.reboot`, isHost ? "Reboot this host" : "Reboot this VM/CT");
+			} else if (await this.getObjectAsync(`${prefix}.reboot`)) {
+				await this.delObjectAsync(`${prefix}.reboot`);
+			}
 		}
-		// remove targets that the API no longer delivers (deleted VM/CT)
+		// remove targets that the API no longer delivers (deleted VM/CT) – only if enabled in the settings
 		const existing = await this.getForeignObjectsAsync(`${this.namespace}.targets.*`, "device");
 		for (const devId of Object.keys(existing)) {
 			const parts = devId.split(".");
 			if (parts.length === 4 && !current.has(parts[3])) {
-				await this.delObjectAsync(`targets.${parts[3]}`, { recursive: true });
-				this.log.info(`Target no longer delivered, removed: ${parts[3]}`);
+				if (this.config.deleteStaleTargets !== false) {
+					await this.delObjectAsync(`targets.${parts[3]}`, { recursive: true });
+					this.log.info(`Target no longer delivered, removed: ${parts[3]}`);
+				} else {
+					this.log.debug(`Target no longer delivered, kept (deletion disabled): ${parts[3]}`);
+				}
 			}
 		}
 		this.targets = current;
+		await this.notifyTargets(targets);
 	}
 
 	// ── actions ──────────────────────────────────────────────────────────────
@@ -487,9 +667,9 @@ class UltimateUpdater extends utils.Adapter {
 			await this.action(securityOnly ? "Security update" : "Update of all VMs/CTs", async () => {
 				const status = await this.api().getStatus();
 				const list = ((status && status.targets) || []).filter(
-					t => t.type !== "host" && (!securityOnly || (t.security_updates || 0) > 0),
+					t => t.type !== "host" && !this.isExcluded(t) && (!securityOnly || (t.security_updates || 0) > 0),
 				);
-				this.log.info(`Starting update of ${list.length} VMs/CTs (hosts excluded)`);
+				this.log.info(`Starting update of ${list.length} VMs/CTs (hosts and excluded targets skipped)`);
 				for (const t of list) {
 					try {
 						await this.api().update(t.id);
@@ -497,6 +677,34 @@ class UltimateUpdater extends utils.Adapter {
 						this.log.warn(`Update of ${t.name || t.id} failed: ${e.message}`);
 					}
 				}
+			});
+			return;
+		}
+		const cancel = /^jobs\.([^.]+)\.cancel$/.exec(rel);
+		if (cancel) {
+			const unitState = await this.getStateAsync(`jobs.${cancel[1]}.unit`);
+			const unit = unitState && unitState.val ? String(unitState.val) : cancel[1];
+			await this.queue(async () => {
+				try {
+					await this.api().cancelJob(unit);
+					this.log.info(`Cancellation of job ${unit} requested`);
+				} catch (e) {
+					this.log.error(`Cancelling job ${unit} failed: ${e.message}`);
+				}
+			});
+			this.kickPoll();
+			return;
+		}
+		const rb = /^targets\.([^.]+)\.reboot$/.exec(rel);
+		if (rb) {
+			const t = this.targets.get(rb[1]);
+			if (!this.config.allowReboot || !t) {
+				this.log.warn("Reboot is disabled in the adapter settings or the target is unknown.");
+				return;
+			}
+			await this.action(`Reboot of ${t.name || t.id}`, async () => {
+				const res = await this.api().reboot(t.id);
+				this.log.info(`Reboot of ${t.name || t.id} started${res && res.job ? ` (job ${res.job})` : ""}`);
 			});
 			return;
 		}
@@ -519,6 +727,30 @@ class UltimateUpdater extends utils.Adapter {
 				this.log.info(`${label} started${res && res.job ? ` (job ${res.job})` : ""}`);
 			});
 		}
+	}
+
+	/**
+	 * Admin requests (target list for the exclusion selection).
+	 *
+	 * @param {ioBroker.Message} obj - message
+	 */
+	async onMessage(obj) {
+		if (!obj || obj.command !== "getTargets" || !obj.callback) {
+			return;
+		}
+		let list = [...this.targets.values()];
+		if (!list.length && this.client) {
+			try {
+				const status = await this.api().getStatus();
+				list = (status && status.targets) || [];
+			} catch (e) {
+				this.log.debug(`Target list for admin not available: ${e.message}`);
+			}
+		}
+		const options = list
+			.filter(t => t.type !== "host")
+			.map(t => ({ label: `${t.name || t.id} (${t.type}, ${t.id})`, value: String(t.id) }));
+		this.sendTo(obj.from, obj.command, options, obj.callback);
 	}
 
 	/**

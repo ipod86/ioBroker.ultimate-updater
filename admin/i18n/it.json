@@ -14,5 +14,17 @@
 	"Address of the Ultimate Updater Web UI, e.g. 192.168.1.10": "Indirizzo dell'interfaccia web di Ultimate Updater, ad es. 192.168.1.10",
 	"Port": "Porta",
 	"Web UI port, default 8765": "Porta dell'interfaccia web, predefinita 8765",
-	"Use HTTPS": "Usa HTTPS"
+	"Use HTTPS": "Usa HTTPS",
+	"Updates and actions": "Aggiornamenti e azioni",
+	"Excluded from \"update all\"": "Esclusi da \"aggiorna tutto\"",
+	"These VMs/CTs are skipped by the collective update buttons. They can still be updated individually. The list is loaded from the running instance.": "Queste VM/CT vengono saltate dai pulsanti di aggiornamento collettivo. Possono comunque essere aggiornate singolarmente. L'elenco viene caricato dall'istanza in esecuzione.",
+	"Allow reboot buttons": "Consenti pulsanti di riavvio",
+	"Creates a reboot button for hosts/VMs/CTs that need a reboot. Off by default.": "Crea un pulsante di riavvio per host/VM/CT che necessitano di un riavvio. Disattivato per impostazione predefinita.",
+	"Delete targets that no longer exist": "Elimina i target non più esistenti",
+	"Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). If off, they are kept.": "Rimuove gli stati di host/VM/CT che Ultimate Updater non segnala più (ad es. eliminati in Proxmox). Se disattivato, vengono mantenuti.",
+	"Notifications": "Notifiche",
+	"Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.": "Inviate tramite il gestore notifiche di ioBroker (Telegram, e-mail, … si configurano lì). Vengono notificate solo le modifiche.",
+	"New security updates": "Nuovi aggiornamenti di sicurezza",
+	"Reboot required": "Riavvio necessario",
+	"Job failed or interrupted": "Job non riuscito o interrotto"
 }

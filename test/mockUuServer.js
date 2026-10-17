@@ -13,7 +13,7 @@ const http = require("node:http");
  * @returns {Promise<{server: http.Server, state: any, port: number}>} running mock
  */
 function startMock() {
-	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[]}} */
+	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean}} */
 	const state = {
 		sessions: new Map(),
 		logins: 0,
@@ -22,8 +22,10 @@ function startMock() {
 		targets: [
 			{ id: "lxc:101", name: "web", type: "lxc", node: "pve", reachable: true, security_updates: 2, normal_updates: 5, reboot_required: false },
 			{ id: "host:pve", name: "pve", type: "host", node: "pve", reachable: true, security_updates: 0, normal_updates: 1, reboot_required: true },
+			{ id: "lxc:103", name: "db", type: "lxc", node: "pve", reachable: true, security_updates: 1, normal_updates: 0, reboot_required: false },
 		],
 		jobs: [{ unit: "uu-1", target: "lxc:102", state: "failed", exit_code: 1 }],
+		startJobOnUpdate: false,
 	};
 	const server = http.createServer((req, res) => {
 		let body = "";
@@ -77,6 +79,20 @@ function startMock() {
 					state.sessions.delete(cookie[1]);
 					return send(200, { authenticated: false });
 				}
+				const cancel = /^\/api\/jobs\/([^/]+)\/cancel$/.exec(req.url || "");
+				if (cancel) {
+					state.actions.push(["cancel", decodeURIComponent(cancel[1])]);
+					const job = state.jobs.find(j => j.unit === decodeURIComponent(cancel[1]));
+					if (job) {
+						job.state = "interrupted";
+					}
+					return send(202, { unit: decodeURIComponent(cancel[1]), state: "stopping" });
+				}
+				const reboot = /^\/api\/targets\/([^/]+)\/reboot$/.exec(req.url || "");
+				if (reboot) {
+					state.actions.push(["reboot", decodeURIComponent(reboot[1])]);
+					return send(202, { job: "uu-rb", state: "running" });
+				}
 				if (req.url === "/api/check-all") {
 					state.actions.push(["check-all", ""]);
 					return send(202, { job: "uu-all", state: "running" });
@@ -84,6 +100,15 @@ function startMock() {
 				const m = /^\/api\/(update|check|update-node|check-node)\/(.+)$/.exec(req.url || "");
 				if (m) {
 					state.actions.push([m[1], decodeURIComponent(m[2])]);
+					if (state.startJobOnUpdate && m[1] === "update") {
+						state.jobs.push({
+							unit: "uu-2",
+							target: decodeURIComponent(m[2]),
+							state: "running",
+							started_at: new Date().toISOString(),
+						});
+						state.startJobOnUpdate = false;
+					}
 					return send(202, { target: decodeURIComponent(m[2]), job: "uu-2", state: "running" });
 				}
 			}

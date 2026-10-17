@@ -122,6 +122,104 @@
 			"xl": 4,
 			"min": 1,
 			"max": 86400
+		},
+		"_hdrActions": {
+			"type": "header",
+			"text": "Updates and actions",
+			"size": 4,
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 12,
+			"xl": 12
+		},
+		"excludeTargets": {
+			"type": "selectSendTo",
+			"command": "getTargets",
+			"multiple": true,
+			"noTranslation": true,
+			"label": "Excluded from \"update all\"",
+			"help": "These VMs/CTs are skipped by the collective update buttons. They can still be updated individually. The list is loaded from the running instance.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 8,
+			"xl": 8
+		},
+		"allowReboot": {
+			"type": "checkbox",
+			"label": "Allow reboot buttons",
+			"help": "Creates a reboot button for hosts/VMs/CTs that need a reboot. Off by default.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"deleteStaleTargets": {
+			"type": "checkbox",
+			"label": "Delete targets that no longer exist",
+			"help": "Removes the states of hosts/VMs/CTs that Ultimate Updater no longer reports (e.g. deleted in Proxmox). If off, they are kept.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"_hdrNotify": {
+			"type": "header",
+			"text": "Notifications",
+			"size": 4,
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 12,
+			"xl": 12
+		},
+		"_notifyInfo": {
+			"type": "staticText",
+			"text": "Sent via the ioBroker notification manager (Telegram, e-mail, … are configured there). Only changes are notified.",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 12,
+			"lg": 12,
+			"xl": 12
+		},
+		"notifySecurity": {
+			"type": "checkbox",
+			"label": "New security updates",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"notifyReboot": {
+			"type": "checkbox",
+			"label": "Reboot required",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
+		},
+		"notifyJobFailed": {
+			"type": "checkbox",
+			"label": "Job failed or interrupted",
+			"newLine": true,
+			"xs": 12,
+			"sm": 12,
+			"md": 6,
+			"lg": 4,
+			"xl": 4
 		}
 	}
 }
