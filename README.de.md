@@ -80,7 +80,7 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 
 Es wird nie automatisch aktualisiert oder neu gestartet – nur per Knopfdruck. Solange ein Job läuft, werden weitere Aktionen abgelehnt.
 
-**Sammel-Updates laufen nacheinander:** Der Ultimate Updater antwortet, sobald ein Job *gestartet* ist (HTTP 202). Der Adapter wartet deshalb, bis der Job eines Targets beendet ist, bevor er das nächste startet. Auch auf anderswo gestartete Jobs (z. B. in der Web-UI) wird gewartet. Den Fortschritt zeigen `bulk.active` und `bulk.progress` (z. B. `3/7: web`, am Ende `6 ok, 1 failed, 0 not started`).
+**Sammel-Updates laufen nacheinander:** Der Ultimate Updater antwortet, sobald ein Job *gestartet* ist (HTTP 202). Der Adapter wartet deshalb, bis der Job eines Targets beendet ist, bevor er das nächste startet. Auch auf anderswo gestartete Jobs (z. B. in der Web-UI) wird gewartet. Den Fortschritt zeigen `bulk.active` und `bulk.progress` (z. B. `3/7: web`, am Ende z. B. `4 ok, 2 unchanged, 1 failed, 0 not started`; "unchanged" = Jobstatus `skipped`, es gab nichts zu aktualisieren).
 
 ### Benachrichtigungen
 
@@ -118,6 +118,7 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 * (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README
 * (ipod86) Einstellung, ob Sammel-Updates auch ausgeschaltete VMs/CTs umfassen (Standard: nur laufende)
 * (ipod86) Anmeldung per API-Token über die Integrations-API v1 von Ultimate Updater 5.2 (Web-UI-Login bleibt verfügbar)
+* (ipod86) Sammel-Updates zählen Jobs ohne Paketänderung (Jobstatus `skipped`, Ultimate Updater 5.2) als "unchanged" statt als fehlgeschlagen
 
 Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

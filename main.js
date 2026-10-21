@@ -940,8 +940,11 @@ class UltimateUpdater extends utils.Adapter {
 		this.bulk = bulk;
 		let ok = 0;
 		let failed = 0;
+		let unchanged = 0; // job state "skipped": nothing to update (Ultimate Updater 5.2+)
 		let skipped = 0;
 		let stoppedSkipped = 0;
+		const resultText = () =>
+			`${ok} ok${unchanged ? `, ${unchanged} unchanged` : ""}, ${failed} failed, ${skipped} not started${stoppedSkipped ? `, ${stoppedSkipped} shut down skipped` : ""}`;
 		try {
 			const jobs = await this.queue(() => this.api().getJobs());
 			if (jobs.some(j => BUSY_STATES.includes(j.state))) {
@@ -986,25 +989,21 @@ class UltimateUpdater extends utils.Adapter {
 				const result = unit ? await this.waitForJobs(unit) : await this.waitForJobs();
 				if (!unit || result === "completed" || result === "completed_with_warnings" || result === "unknown") {
 					ok++;
+				} else if (result === "skipped") {
+					unchanged++;
 				} else {
 					failed++;
 				}
 				this.log.info(`Update of ${name}: ${result || "finished"} (${i + 1}/${list.length})`);
 			}
-			this.log.info(
-				`${label} finished: ${ok} ok, ${failed} failed, ${skipped} not started${stoppedSkipped ? `, ${stoppedSkipped} shut down skipped` : ""}`,
-			);
+			this.log.info(`${label} finished: ${resultText()}`);
 		} catch (e) {
 			this.log.error(`${label} aborted: ${e.message}`);
 		} finally {
 			this.bulk = null;
 			if (!this.unloading) {
 				await this.setStateChangedAsync("bulk.active", false, true);
-				await this.setStateChangedAsync(
-					"bulk.progress",
-					`${ok} ok, ${failed} failed, ${skipped} not started${stoppedSkipped ? `, ${stoppedSkipped} shut down skipped` : ""}`,
-					true,
-				);
+				await this.setStateChangedAsync("bulk.progress", resultText(), true);
 				this.kickPoll();
 			}
 		}

@@ -30,7 +30,7 @@ const V1_PERMISSIONS = {
  * @returns {Promise<{server: http.Server, state: any, port: number}>} running mock
  */
 function startMock() {
-	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean, autoCompleteMs: number, timeline: any[], tokens: Record<string, string[]>, v1Calls: any[]}} */
+	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean, autoCompleteMs: number, timeline: any[], tokens: Record<string, string[]>, v1Calls: any[], finalStates: Record<string, string>}} */
 	const state = {
 		sessions: new Map(),
 		logins: 0,
@@ -53,6 +53,8 @@ function startMock() {
 		},
 		/** @type {any[]} v1 requests: [method, path, body] */
 		v1Calls: [],
+		/** @type {Record<string, string>} final job state per target (default "completed") */
+		finalStates: {},
 	};
 
 	/**
@@ -211,7 +213,7 @@ function startMock() {
 						state.jobs.push(job);
 						state.timeline.push(["start", job.target, Date.now()]);
 						setTimeout(() => {
-							job.state = "completed";
+							job.state = state.finalStates[job.target] || "completed";
 							state.timeline.push(["done", job.target, Date.now()]);
 						}, state.autoCompleteMs);
 						return send(202, { target: job.target, job: job.unit, state: "running" });

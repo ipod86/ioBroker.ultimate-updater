@@ -261,13 +261,16 @@ tests.integration(path.join(__dirname, ".."), {
 			it("updates with confirm and skips the shut down CT in collective updates", async function () {
 				this.timeout(30000);
 				mock.state.autoCompleteMs = 1500;
+				// Ultimate Updater 5.2: an update without package changes ends as "skipped", not as failure
+				mock.state.finalStates["lxc:103"] = "skipped";
 				await harness.states.setStateAsync(`${NS}.updateAllVmsCts`, true, false);
 				await wait(9000);
 				const updates = mock.state.v1Calls.filter(c => c[0] === "POST" && c[1].startsWith("/api/v1/update/"));
 				expect(updates.map(c => c[1])).to.deep.equal(["/api/v1/update/lxc%3A101", "/api/v1/update/lxc%3A103"]);
 				expect(updates.every(c => c[2] && c[2].confirm === true)).to.equal(true);
 				const progress = await harness.states.getStateAsync(`${NS}.bulk.progress`);
-				expect(progress && progress.val).to.equal("2 ok, 0 failed, 0 not started, 1 shut down skipped");
+				expect(progress && progress.val).to.equal("1 ok, 1 unchanged, 0 failed, 0 not started, 1 shut down skipped");
+				mock.state.finalStates = {};
 			});
 
 			it("checks a host via check-node with an empty body", async () => {

@@ -80,7 +80,7 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 
 Nothing is ever updated or rebooted automatically – only when you press a button. While a job is running, further actions are refused.
 
-**Collective updates run one target after the other:** Ultimate Updater answers as soon as a job has *started* (HTTP 202), so the adapter waits until the job of one target has finished before it starts the next one. Jobs started elsewhere (e.g. in the Web UI) are waited for as well. Progress is shown in `bulk.active` and `bulk.progress` (e.g. `3/7: web`, at the end `6 ok, 1 failed, 0 not started`).
+**Collective updates run one target after the other:** Ultimate Updater answers as soon as a job has *started* (HTTP 202), so the adapter waits until the job of one target has finished before it starts the next one. Jobs started elsewhere (e.g. in the Web UI) are waited for as well. Progress is shown in `bulk.active` and `bulk.progress` (e.g. `3/7: web`, at the end e.g. `4 ok, 2 unchanged, 1 failed, 0 not started`; "unchanged" = job state `skipped`, there was nothing to update).
 
 ### Notifications
 
@@ -118,6 +118,7 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 * (ipod86) clearer description of the security update button; security notes in the README
 * (ipod86) setting whether collective updates include shut down VMs/CTs (default: only running ones)
 * (ipod86) authentication with an API token via the integration API v1 of Ultimate Updater 5.2 (Web UI login stays available)
+* (ipod86) collective updates count jobs without package changes (job state `skipped`, Ultimate Updater 5.2) as "unchanged" instead of failed
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
