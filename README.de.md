@@ -113,7 +113,7 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 	### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.0.2 (2026-10-21)
 * (ipod86) Erste Version
 * (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
 * (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README

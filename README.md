@@ -112,8 +112,7 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 0.0.2 (2026-10-21)
 * (ipod86) initial release
 * (ipod86) collective updates run one target after the other (waiting for each job), progress in `bulk.*`
 * (ipod86) clearer description of the security update button; security notes in the README
