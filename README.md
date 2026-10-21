@@ -60,6 +60,7 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 | `info.lastRefresh`, `info.targetCount`, `info.updaterVersion`, `info.updaterUpdateAvailable` | General information |
 | `jobRunning` | A check/update job is running |
 | `summary.text` | Short summary in the system language, e.g. "7 updates on 3 systems, 1 reboot required" |
+| `summary.report` | Status report as multi-line text like the status mail of Ultimate Updater (updates per node, current, reboot required, not reachable, errors, skipped), headings in the system language – e.g. for Telegram or a Markdown card |
 | `summary.*` | Pending security/normal updates in total, targets with updates, unreachable targets, targets that need a reboot |
 | `targets.<name>_<id>.*` | All fields Ultimate Updater delivers per host/LXC/VM (e.g. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
 | `targets.<…>.jobState`, `targets.<…>.jobUnit` | State and id of the latest job of this target (`none` if there is none) |
@@ -119,6 +120,7 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 * (ipod86) setting whether collective updates include shut down VMs/CTs (default: only running ones)
 * (ipod86) authentication with an API token via the integration API v1 of Ultimate Updater 5.2 (Web UI login stays available)
 * (ipod86) collective updates count jobs without package changes (job state `skipped`, Ultimate Updater 5.2) as "unchanged" instead of failed
+* (ipod86) new state `summary.report`: status report as text like the status mail of Ultimate Updater
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

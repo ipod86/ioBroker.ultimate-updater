@@ -11,6 +11,7 @@
 const utils = require("@iobroker/adapter-core");
 const { Credentials } = require("@iobroker/adapter-core");
 const { UuClient, BUSY_STATES, FAILURE_STATES } = require("./lib/uu-client");
+const { buildReport } = require("./lib/report");
 const { texts } = require("./lib/i18n");
 
 const MAX_TIMEOUT_S = 2147483; // setTimeout limit (~24.8 days)
@@ -796,6 +797,14 @@ class UltimateUpdater extends utils.Adapter {
 			parts.push(this.T.summaryReboot(reboot.length));
 		}
 		await this.value("summary.text", "Summary as text", parts.join(", "));
+		await this.value(
+			"summary.report",
+			"Status report as text (like the Ultimate Updater status mail)",
+			buildReport(targets, this.T),
+			{
+				role: "text",
+			},
+		);
 		await this.value("summary.rebootRequiredCount", "Targets with pending reboot", reboot.length);
 		await this.value(
 			"summary.rebootRequiredList",

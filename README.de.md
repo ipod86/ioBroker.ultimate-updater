@@ -60,6 +60,7 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 | `info.lastRefresh`, `info.targetCount`, `info.updaterVersion`, `info.updaterUpdateAvailable` | Allgemeine Informationen |
 | `jobRunning` | Ein Prüf-/Update-Job läuft |
 | `summary.text` | Kurze Zusammenfassung in der Systemsprache, z. B. „7 Updates auf 3 Systemen, 1 Neustart nötig“ |
+| `summary.report` | Statusbericht als mehrzeiliger Text wie die Status-Mail des Ultimate Updater (Updates je Node, aktuell, Neustart nötig, nicht erreichbar, Fehler, übersprungen), Überschriften in der Systemsprache – z. B. für Telegram oder eine Markdown-Karte |
 | `summary.*` | Offene Sicherheits-/normale Updates gesamt, Targets mit Updates, nicht erreichbare Targets, Targets mit ausstehendem Neustart |
 | `targets.<Name>_<ID>.*` | Alle Felder, die der Ultimate Updater pro Host/LXC/VM liefert (z. B. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
 | `targets.<…>.jobState`, `targets.<…>.jobUnit` | Status und ID des letzten Jobs dieses Targets (`none`, wenn es keinen gibt) |
@@ -119,6 +120,7 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 * (ipod86) Einstellung, ob Sammel-Updates auch ausgeschaltete VMs/CTs umfassen (Standard: nur laufende)
 * (ipod86) Anmeldung per API-Token über die Integrations-API v1 von Ultimate Updater 5.2 (Web-UI-Login bleibt verfügbar)
 * (ipod86) Sammel-Updates zählen Jobs ohne Paketänderung (Jobstatus `skipped`, Ultimate Updater 5.2) als "unchanged" statt als fehlgeschlagen
+* (ipod86) neuer Datenpunkt `summary.report`: Statusbericht als Text wie die Status-Mail des Ultimate Updater
 
 Ältere Changelog-Einträge stehen in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
