@@ -19,7 +19,7 @@ tests.integration(path.join(__dirname, ".."), {
 				mock = await startMock();
 				harness = getHarness();
 				const obj = await harness.objects.getObjectAsync(`system.adapter.${NS}`);
-				// password is in encryptedNative → store it encrypted like admin does (legacy XOR, still supported)
+				// the token is in encryptedNative → store it encrypted like admin does (legacy XOR, still supported)
 				const sys = await harness.objects.getObjectAsync("system.config");
 				const secret = String(sys.native.secret);
 				const encrypt = v => [...v].map((c, i) => String.fromCharCode(secret.charCodeAt(i % secret.length) ^ c.charCodeAt(0))).join("");
@@ -27,9 +27,7 @@ tests.integration(path.join(__dirname, ".."), {
 					ip: "127.0.0.1",
 					port: mock.port,
 					https: false,
-					username: "root@pam",
-					password: encrypt("secret"),
-					realm: "",
+					apiToken: encrypt("tok-full"),
 					pollIdle: 5,
 					pollBusy: 1,
 					excludeTargets: ["lxc:103"],
@@ -41,8 +39,8 @@ tests.integration(path.join(__dirname, ".."), {
 			});
 			after(() => mock && mock.server.close());
 
-			it("logs in with separate realm and connects", async () => {
-				expect(mock.state.lastLogin).to.deep.include({ username: "root", realm: "pam" });
+			it("connects with the API token", async () => {
+				expect(mock.state.v1Calls.some(c => c[1] === "/api/v1/status")).to.equal(true);
 				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
 				expect(conn && conn.val).to.equal(true);
 			});
@@ -188,15 +186,13 @@ tests.integration(path.join(__dirname, ".."), {
 				expect(await harness.objects.getObjectAsync(`${NS}.targets.db_lxc_103`)).to.not.be.ok;
 			});
 
-			it("logs out when the adapter stops", async function () {
+			it("stops", async function () {
 				this.timeout(10000);
 				await harness.stopAdapter();
-				await wait(500);
-				expect(mock.state.sessions.size).to.equal(0);
 			});
 		});
 
-		suite("With an API token (integration API v1)", getHarness => {
+		suite("Shut down guests and node checks", getHarness => {
 			/** @type {any} */
 			let mock;
 			/** @type {any} */
@@ -231,11 +227,8 @@ tests.integration(path.join(__dirname, ".."), {
 					ip: "127.0.0.1",
 					port: mock.port,
 					https: false,
-					authMode: "token",
 					credentialMode: "manual",
 					apiToken: encrypt("tok-full"),
-					username: "",
-					password: "",
 					pollIdle: 5,
 					pollBusy: 1,
 					excludeTargets: [],
@@ -249,8 +242,7 @@ tests.integration(path.join(__dirname, ".."), {
 			});
 			after(() => mock && mock.server.close());
 
-			it("reads the status via /api/v1 without a login", async () => {
-				expect(mock.state.logins).to.equal(0);
+			it("reads the status via /api/v1 and maps skip_reason", async () => {
 				expect(mock.state.v1Calls.some(c => c[1] === "/api/v1/status")).to.equal(true);
 				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
 				expect(conn && conn.val).to.equal(true);
@@ -308,8 +300,8 @@ tests.integration(path.join(__dirname, ".."), {
 						.join("");
 				await harness.objects.setObjectAsync(CRED, {
 					type: "config",
-					common: { name: "UU test login" },
-					native: { type: "custom", version: 1, encryptedFields: ["password"], login: "root@pam", password: encrypt("secret") },
+					common: { name: "UU test token" },
+					native: { type: "custom", version: 1, encryptedFields: ["key"], key: encrypt("tok-read") },
 				});
 				const obj = await harness.objects.getObjectAsync(`system.adapter.${NS}`);
 				Object.assign(obj.native, {
@@ -318,9 +310,7 @@ tests.integration(path.join(__dirname, ".."), {
 					https: false,
 					credentialMode: "manager",
 					credentialId: CRED,
-					username: "",
-					password: "",
-					realm: "",
+					apiToken: "",
 				});
 				await harness.objects.setObjectAsync(obj._id, obj);
 				await harness.startAdapterAndWait();
@@ -328,19 +318,24 @@ tests.integration(path.join(__dirname, ".."), {
 			});
 			after(() => mock && mock.server.close());
 
-			it("logs in with the credential", async () => {
-				expect(mock.state.lastLogin).to.deep.include({ username: "root", realm: "pam", password: "secret" });
+			it("uses the token of the credential", async () => {
+				expect(mock.state.v1Calls.some(c => c[1] === "/api/v1/status")).to.equal(true);
 				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
 				expect(conn && conn.val).to.equal(true);
 			});
 
-			it("uses changed login data right away", async function () {
+			it("uses a changed token right away", async function () {
 				this.timeout(15000);
+				// with the read-only token the job log (permission "logs") is denied; with the full token it works
+				delete mock.state.tokens["tok-read"];
 				const cred = await harness.objects.getObjectAsync(CRED);
-				cred.native.login = "admin@pve";
+				cred.native.key = encrypt("tok-full");
 				await harness.objects.setObjectAsync(CRED, cred);
+				const before = mock.state.v1Calls.length;
 				await wait(3000);
-				expect(mock.state.lastLogin).to.deep.include({ username: "admin", realm: "pve" });
+				const conn = await harness.states.getStateAsync(`${NS}.info.connection`);
+				expect(mock.state.v1Calls.length).to.be.greaterThan(before);
+				expect(conn && conn.val).to.equal(true);
 			});
 
 			it("stops", async function () {

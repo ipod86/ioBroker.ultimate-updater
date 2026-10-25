@@ -1,10 +1,9 @@
 "use strict";
 
 /**
- * Small mock of Ultimate Updater (behaviour as in web-ui/server.py):
- * - Web UI API: login with separate realm, session cookie, CSRF check on POST, 202 for actions
- * - integration API v1: bearer token with permissions, {"confirm": true} for update/reboot,
- *   empty body for checks, no "status" field per target, skip_reason for shut down guests
+ * Small mock of the Ultimate Updater integration API v1 (behaviour as in web-ui/server.py):
+ * bearer token with permissions, {"confirm": true} for update/reboot, empty body for checks,
+ * 202 for actions, no "status" field per target, skip_reason for shut down guests
  */
 
 const http = require("node:http");
@@ -30,11 +29,8 @@ const V1_PERMISSIONS = {
  * @returns {Promise<{server: http.Server, state: any, port: number}>} running mock
  */
 function startMock() {
-	/** @type {{sessions: Map<string, any>, logins: number, lastLogin: any, actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean, autoCompleteMs: number, timeline: any[], tokens: Record<string, string[]>, v1Calls: any[], finalStates: Record<string, string>}} */
+	/** @type {{actions: string[][], targets: any[], jobs: any[], startJobOnUpdate: boolean, autoCompleteMs: number, timeline: any[], tokens: Record<string, string[]>, v1Calls: any[], finalStates: Record<string, string>}} */
 	const state = {
-		sessions: new Map(),
-		logins: 0,
-		lastLogin: null,
 		actions: [],
 		targets: [
 			{ id: "lxc:101", name: "web", type: "lxc", node: "pve", reachable: true, security_updates: 2, normal_updates: 5, reboot_required: false },
@@ -83,10 +79,8 @@ function startMock() {
 				res.end(JSON.stringify(data));
 			};
 			let url = req.url || "";
-			let v1 = false;
 
 			if (url.startsWith("/api/v1/")) {
-				v1 = true;
 				const rest = url.slice("/api/v1/".length);
 				let parsed;
 				try {
@@ -132,35 +126,10 @@ function startMock() {
 						targets: state.targets.map(v1Target),
 					});
 				}
-				// map the remaining v1 routes onto the Web UI handlers below
+				// map the remaining v1 routes onto the internal handlers below
 				url = route === "reboot" ? `/api/targets/${parts[1]}/reboot` : `/api/${rest}`;
-			}
-
-			const cookie = (req.headers.cookie || "").match(/UU_SESSION=([^;]+)/);
-			const session = cookie && state.sessions.get(cookie[1]);
-			if (!v1 && req.method === "POST" && url === "/api/login") {
-				const p = JSON.parse(body || "{}");
-				state.lastLogin = p;
-				// like server.py: username without "@", realm required
-				if (typeof p.realm !== "string" || /@/.test(p.username) || p.password !== "secret") {
-					return send(401, { error: { code: "LOGIN_FAILED", message: "Invalid credentials." } });
-				}
-				state.logins++;
-				const token = `tok${state.logins}`;
-				state.sessions.set(token, { csrf: `csrf${state.logins}` });
-				return send(
-					200,
-					{ authenticated: true, csrf: `csrf${state.logins}` },
-					{
-						"Set-Cookie": `UU_SESSION=${token}; Path=/; HttpOnly`,
-					},
-				);
-			}
-			if (!v1 && !session) {
-				return send(401, { error: { code: "AUTH_REQUIRED", message: "Sign in" } });
-			}
-			if (req.method === "GET" && url === "/api/status") {
-				return send(200, { schema_version: "1", generated_at: "2026-10-17T08:00:00Z", targets: state.targets });
+			} else {
+				return send(404, { error: { code: "NOT_FOUND", message: "Not found." } });
 			}
 			if (req.method === "GET" && url === "/api/jobs") {
 				return send(200, { jobs: state.jobs });
@@ -173,13 +142,6 @@ function startMock() {
 				return send(200, { unit: decodeURIComponent(log[1]), log: "E: apt failed" });
 			}
 			if (req.method === "POST") {
-				if (!v1 && req.headers["x-csrf-token"] !== session.csrf) {
-					return send(403, { error: { code: "CSRF_REJECTED", message: "A valid CSRF token is required." } });
-				}
-				if (!v1 && cookie && url === "/api/logout") {
-					state.sessions.delete(cookie[1]);
-					return send(200, { authenticated: false });
-				}
 				const cancel = /^\/api\/jobs\/([^/]+)\/cancel$/.exec(url);
 				if (cancel) {
 					state.actions.push(["cancel", decodeURIComponent(cancel[1])]);

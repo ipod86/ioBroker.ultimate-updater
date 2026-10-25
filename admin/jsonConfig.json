@@ -44,30 +44,9 @@
 			"lg": 2,
 			"xl": 2
 		},
-		"authMode": {
-			"type": "select",
-			"label": "Authentication",
-			"options": [
-				{
-					"label": "Web UI login (Proxmox user)",
-					"value": "webui"
-				},
-				{
-					"label": "API token (integration API v1)",
-					"value": "token"
-				}
-			],
-			"help": "API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4
-		},
 		"credentialMode": {
 			"type": "select",
-			"label": "Login data",
+			"label": "API token",
 			"options": [
 				{
 					"label": "Enter here",
@@ -88,8 +67,8 @@
 		},
 		"credentialId": {
 			"type": "credential",
-			"label": "Proxmox login",
-			"help": "Web UI login: a \"Login & password\" credential (e.g. root@pam). API token: a \"Key\" credential.",
+			"label": "API token",
+			"help": "A \"Key\" credential that contains the API token",
 			"hidden": "data.credentialMode !== 'manager'",
 			"newLine": true,
 			"xs": 12,
@@ -98,54 +77,18 @@
 			"lg": 4,
 			"xl": 4
 		},
-		"username": {
-			"type": "text",
-			"label": "Username",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4,
-			"help": "Proxmox user without @realm, e.g. root. Needs full Administrator rights at \"/\" and no 2FA.",
-			"hidden": "data.credentialMode === 'manager' || data.authMode === 'token'"
-		},
-		"password": {
-			"type": "password",
-			"label": "Password",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4,
-			"repeat": false,
-			"hidden": "data.credentialMode === 'manager' || data.authMode === 'token'"
-		},
 		"apiToken": {
 			"type": "password",
 			"repeat": false,
 			"label": "API token",
-			"help": "Shown only once when it is created on the host. Stored encrypted.",
-			"hidden": "data.credentialMode === 'manager' || data.authMode !== 'token'",
+			"help": "API token: Ultimate Updater 5.2 or newer, HTTPS only. Create it on the host with \"ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel\".",
+			"hidden": "data.credentialMode === 'manager'",
 			"newLine": true,
 			"xs": 12,
 			"sm": 12,
 			"md": 6,
 			"lg": 4,
 			"xl": 4
-		},
-		"realm": {
-			"type": "text",
-			"label": "Realm",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4,
-			"help": "Authentication domain as shown on the Web UI login, e.g. pam or pve",
-			"hidden": "data.authMode === 'token'"
 		},
 		"validateCertificate": {
 			"type": "checkbox",

@@ -15,7 +15,7 @@
 
 Brings the update status of your Proxmox hosts, LXC containers and VMs into ioBroker and lets you start checks and updates with a button.
 
-The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Proxmox) by [@BassT23](https://github.com/BassT23)**. Ultimate Updater does the actual work on your Proxmox cluster (update execution, snapshots/backups, filters, status model); this adapter only reads its status (integration API v1 with token, or the Web UI API) and triggers the actions it offers. Many thanks to BassT23 for the permission to use the name.
+The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Proxmox) by [@BassT23](https://github.com/BassT23)**. Ultimate Updater does the actual work on your Proxmox cluster (update execution, snapshots/backups, filters, status model); this adapter only reads its status via the integration API v1 and triggers the actions it offers. Many thanks to BassT23 for the permission to use the name.
 
 The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
 
@@ -24,26 +24,22 @@ The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimat
 ### Requirements
 
 - Node.js >= 22, js-controller >= 6.0.11, admin >= 7.8.23 (the credentials manager needs admin 7.9)
-- Ultimate Updater **5.1.3 or newer** with the Web UI enabled (default port `8765`)
-- One of two ways to authenticate:
-  - **API token (recommended, Ultimate Updater 5.2 / currently the `develop` branch):** the integration API v1 with a bearer token and its own permissions. HTTPS only. On the Proxmox host:
-    ```bash
-    ultimate-updater-api-token enable
-    ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel
-    ```
-    The token is shown only once. Leave out permissions you do not want to grant (e.g. `read,logs,check` for status and checks only); the matching buttons then report "permission denied".
-  - **Web UI login:** a Proxmox account (e.g. `root`, realm `pam`). Ultimate Updater only accepts accounts with full **Administrator** privileges at `/` and **without two-factor authentication**.
+- Ultimate Updater **5.2 or newer** (until 5.2 is released: the `develop` branch) with the Web UI enabled (default port `8765`)
+- An **API token** for the integration API v1. It works over HTTPS only and has its own permissions. On the Proxmox host:
+  ```bash
+  ultimate-updater-api-token enable
+  ultimate-updater-api-token create iobroker --permissions read,logs,check,update,reboot,cancel
+  ```
+  The token is shown only once. Leave out permissions you do not want to grant (e.g. `read,logs,check` for status and checks only); the matching buttons then report "permission denied".
+
+The Web UI login with a Proxmox account is deliberately not supported: it needs an account with full Administrator rights and its endpoints are no stable interface.
 
 ### Configuration
 
 | Setting | Description |
 |---|---|
-| IP address / host name, Port, Use HTTPS | Address of the Ultimate Updater Web UI |
-| Authentication | **Web UI login** (Proxmox user) or **API token** (integration API v1, Ultimate Updater 5.2+, HTTPS only) |
-| API token | Only for "API token" + "enter here". Stored encrypted. With the credentials manager, select a "Key" credential instead. |
-| Login data | **Enter here** (user name and password in the adapter settings) or **from the credentials manager** of the admin (Settings → Credentials, needs admin 7.9 and js-controller 7.2.2 or newer). With the credentials manager you select a "Login & password" credential; changes to it are used immediately without restarting the adapter. |
-| Username / Password | Only for "enter here": Proxmox user name **without** `@realm` (e.g. `root`) and password. `root@pam` is split automatically. The password is stored encrypted. |
-| Realm | Authentication domain as shown on the Web UI login, e.g. `pam` or `pve` |
+| IP address / host name, Port, Use HTTPS | Address of the Ultimate Updater Web UI (the API only works over HTTPS) |
+| API token | **Enter here** (stored encrypted) or **from the credentials manager** of the admin (Settings → Credentials, a "Key" credential; needs admin 7.9 and js-controller 7.2.2 or newer). A changed credential is used immediately without restarting the adapter. |
 | Validate TLS certificate | Off by default because the Web UI usually uses the self-signed Proxmox certificate |
 | Full status refresh | Interval for reading all targets (minutes, default 60). After a job has finished the status is refreshed immediately. |
 | Job poll interval | How often the job list is checked: when idle (default 30 s) and while a job is running (default 2 s) |
@@ -96,17 +92,14 @@ On the very first start nothing is notified; the current state is only recorded.
 
 ### Security
 
-Please be aware of what the current Web UI login means:
-
-- Ultimate Updater only accepts Proxmox accounts with **full Administrator privileges at `/`** (no 2FA). These credentials are stored in ioBroker (encrypted with the ioBroker system secret, or in the central credentials manager). Anyone with access to the ioBroker admin or its object database can effectively use this account.
-- The adapter does **not validate the TLS certificate** by default, because the Web UI normally uses the self-signed Proxmox certificate. Without validation the connection is encrypted, but a man-in-the-middle in your network could intercept the login. Enable *Validate TLS certificate* if the Web UI uses a trusted certificate, and run the adapter only in a trusted network.
+- The **API token** does not grant any Proxmox login. It only works over HTTPS and carries exactly the permissions you give it (`read`, `logs`, `check`, `update`, `reboot`, `cancel`). Grant only what you need and revoke it on the host with `ultimate-updater-api-token revoke <id>`.
+- The token is stored encrypted in ioBroker (or in the central credentials manager). Anyone with access to the ioBroker admin or its object database can use it with the permissions it has.
+- The adapter does **not validate the TLS certificate** by default, because the Web UI normally uses the self-signed Proxmox certificate. Without validation the connection is encrypted, but a man-in-the-middle in your network could read the token. Enable *Validate TLS certificate* if the Web UI uses a trusted certificate, and run the adapter only in a trusted network.
 - Restrict access to the Ultimate Updater Web UI port to the hosts that need it (e.g. firewall rules).
-
-With Ultimate Updater 5.2 the **API token** avoids all of this: it does not grant any Proxmox login, it only works over HTTPS and it carries exactly the permissions you give it (`read`, `logs`, `check`, `update`, `reboot`, `cancel`). Revoke it on the host with `ultimate-updater-api-token revoke <id>`.
 
 ### Note on the API
 
-With "API token" the adapter uses the documented, versioned integration API v1 of Ultimate Updater 5.2 (bearer token, separate permissions, HTTPS only), which was designed together with BassT23 ([BassT23/Proxmox#378](https://github.com/BassT23/Proxmox/issues/378)). With "Web UI login" it uses the endpoints of the Web UI, which are not a stable interface and may change between Ultimate Updater versions – prefer the API token.
+The adapter uses the documented, versioned integration API v1 of Ultimate Updater 5.2 (bearer token, separate permissions, HTTPS only), which was designed together with BassT23 ([BassT23/Proxmox#378](https://github.com/BassT23/Proxmox/issues/378)).
 
 ## Changelog
 <!--
@@ -115,7 +108,8 @@ With "API token" the adapter uses the documented, versioned integration API v1 o
 -->
 
 ### **WORK IN PROGRESS**
-* (ipod86) warning when the Proxmox password would be sent without HTTPS; running requests are aborted on stop; stable roles for time fields; `info.connection` only written on changes; README and translations of the news corrected
+* (ipod86) **Breaking:** only the API token (integration API v1, Ultimate Updater 5.2+) is supported; the Web UI login with a Proxmox user was removed
+* (ipod86) warning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields; `info.connection` only written on changes; README and translations of the news corrected
 * (ipod86) notifications name the target with ID and name ("115 · iobroker"), so targets with the same name can be told apart
 
 ### 0.0.2 (2026-10-21)

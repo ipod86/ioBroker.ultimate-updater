@@ -68,29 +68,14 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 		try {
-			this.client = new UuClient({
-				...this.config,
-				username: cred.login,
-				password: cred.password,
-				token: cred.token,
-			});
-			this.log.info(
-				this.client.tokenMode
-					? "Using the Ultimate Updater integration API v1 (API token)"
-					: "Using the Ultimate Updater Web UI login",
-			);
+			this.client = new UuClient({ ...this.config, token: cred.token });
 		} catch (e) {
 			this.log.error(`Invalid address "${this.config.ip}:${this.config.port}": ${e.message}`);
 			return;
 		}
 
-		if (this.config.authMode === "token" && this.config.https === false) {
-			this.log.warn('The integration API (API token) only works over HTTPS – please enable "Use HTTPS".');
-		}
-		if (this.config.authMode !== "token" && this.config.https === false) {
-			this.log.warn(
-				'"Use HTTPS" is off: the Proxmox password (an Administrator account) is sent unencrypted over the network – please enable HTTPS or use an API token.',
-			);
+		if (this.config.https === false) {
+			this.log.warn('The integration API of Ultimate Updater only works over HTTPS – please enable "Use HTTPS".');
 		}
 		if (!this.config.validateCertificate && this.config.https !== false) {
 			this.log.info(
@@ -124,12 +109,11 @@ class UltimateUpdater extends utils.Adapter {
 	// ── credentials ──────────────────────────────────────────────────────────
 
 	/**
-	 * Login data from the settings or from the central credentials manager (admin ≥ 7.9).
+	 * API token from the settings or from a "Key" credential of the central credentials manager (admin ≥ 7.9).
 	 *
-	 * @returns {Promise<{login?: string, password?: string, token?: string} | null>} login data or null if not usable
+	 * @returns {Promise<{token: string} | null>} token or null if not usable
 	 */
 	async resolveCredentials() {
-		const tokenMode = this.config.authMode === "token";
 		if (this.config.credentialMode === "manager") {
 			if (!Credentials || !Credentials.getCredentials) {
 				this.log.error(
@@ -138,50 +122,32 @@ class UltimateUpdater extends utils.Adapter {
 				return null;
 			}
 			if (!this.config.credentialId) {
-				this.log.error("Please select the login data in the adapter settings (credentials manager).");
+				this.log.error("Please select the API token in the adapter settings (credentials manager).");
 				return null;
 			}
 			try {
 				const c = await Credentials.getCredentials(this, this.config.credentialId);
-				if (tokenMode) {
-					const token = String(c.values.key || "");
-					if (!token) {
-						this.log.error(
-							`Credential "${this.config.credentialId}" has no key – for the API token please select a "Key" credential.`,
-						);
-						return null;
-					}
-					return { token };
-				}
-				const login = String(c.values.login || "");
-				const password = String(c.values.password || "");
-				if (!login || !password) {
+				const token = String(c.values.key || "");
+				if (!token) {
 					this.log.error(
-						`Credential "${this.config.credentialId}" has no login/password (a key credential cannot be used).`,
+						`Credential "${this.config.credentialId}" has no key – please select a "Key" credential with the API token.`,
 					);
 					return null;
 				}
-				return { login, password };
+				return { token };
 			} catch (e) {
 				this.log.error(`Cannot read credential "${this.config.credentialId}": ${e.message}`);
 				return null;
 			}
 		}
-		if (tokenMode) {
-			if (!this.config.apiToken) {
-				this.log.error("Please enter the API token of Ultimate Updater in the adapter settings.");
-				return null;
-			}
-			return { token: this.config.apiToken };
-		}
-		if (!this.config.username || !this.config.password) {
-			this.log.error("Please configure user name and password of the Ultimate Updater Web UI.");
+		if (!this.config.apiToken) {
+			this.log.error("Please enter the API token of Ultimate Updater in the adapter settings.");
 			return null;
 		}
-		return { login: this.config.username, password: this.config.password };
+		return { token: this.config.apiToken };
 	}
 
-	/** Reacts to changes of the selected credential: new login data are used right away. */
+	/** Reacts to changes of the selected credential: a new token is used right away. */
 	async watchCredential() {
 		try {
 			this.unsubscribeCredential = await Credentials.subscribeCredentials(
@@ -189,17 +155,13 @@ class UltimateUpdater extends utils.Adapter {
 				this.config.credentialId,
 				(id, cred) => {
 					if (!cred) {
-						this.log.warn(`Credential ${id} was deleted – please select other login data.`);
+						this.log.warn(`Credential ${id} was deleted – please select another API token.`);
 						this.setState("info.connection", false, true);
 						return;
 					}
-					this.log.info(`Credential ${id} was changed, logging in again`);
+					this.log.info(`Credential ${id} was changed, using the new API token`);
 					if (this.client) {
-						if (this.config.authMode === "token") {
-							this.client.setToken(cred.values.key);
-						} else {
-							this.client.setCredentials(cred.values.login, cred.values.password);
-						}
+						this.client.setToken(cred.values.key);
 					}
 					this.refreshStatus();
 				},
@@ -507,7 +469,7 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
-	 * Shut down guest? Web UI status has "status"; API v1 reports it via skip_reason/check_status.
+	 * Shut down guest? API v1 reports it via skip_reason/check_status (older payloads had a "status" field).
 	 *
 	 * @param {import("./lib/types").ApiData} t - target
 	 * @returns {boolean} true if the VM/CT is shut down
@@ -1177,9 +1139,7 @@ class UltimateUpdater extends utils.Adapter {
 			const client = this.client;
 			this.client = null;
 			if (client) {
-				// abort running requests, end the Web UI session (at most 2 s), then refuse new requests
-				client.abort();
-				await client.logout().catch(() => {});
+				// abort running requests and refuse new ones
 				client.close();
 			}
 		} catch (error) {
