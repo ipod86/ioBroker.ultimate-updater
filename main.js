@@ -57,7 +57,7 @@ class UltimateUpdater extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		await this.setState("info.connection", false, true);
+		await this.setStateChangedAsync("info.connection", false, true);
 
 		const cred = await this.resolveCredentials();
 		if (!cred) {
@@ -86,6 +86,11 @@ class UltimateUpdater extends utils.Adapter {
 
 		if (this.config.authMode === "token" && this.config.https === false) {
 			this.log.warn('The integration API (API token) only works over HTTPS – please enable "Use HTTPS".');
+		}
+		if (this.config.authMode !== "token" && this.config.https === false) {
+			this.log.warn(
+				'"Use HTTPS" is off: the Proxmox password (an Administrator account) is sent unencrypted over the network – please enable HTTPS or use an API token.',
+			);
 		}
 		if (!this.config.validateCertificate && this.config.https !== false) {
 			this.log.info(
@@ -221,7 +226,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Clamps an interval from the config to a valid range.
 	 *
-	 * @param {any} value - configured value
+	 * @param {unknown} value - configured value
 	 * @param {number} def - default value
 	 * @param {number} min - minimum
 	 * @returns {number} value in the same unit
@@ -234,19 +239,23 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Runs the task after all previously queued tasks (no parallel API access).
 	 *
-	 * @param {() => Promise<any>} task - task
-	 * @returns {Promise<any>} task result
+	 * @template T
+	 * @param {() => Promise<T>} task - task
+	 * @returns {Promise<T>} task result
 	 */
 	queue(task) {
 		const run = this.busy.then(task, task);
-		this.busy = run.catch(() => {});
+		this.busy = run.then(
+			() => {},
+			() => {},
+		);
 		return run;
 	}
 
 	/**
 	 * Object id part from free text (same scheme as the original script: only [a-zA-Z0-9_]).
 	 *
-	 * @param {any} s - text
+	 * @param {unknown} s - text
 	 * @returns {string} sanitised id part
 	 */
 	sanitize(s) {
@@ -258,7 +267,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Name alone is not unique (several CTs may share a name) → name + id.
 	 *
-	 * @param {any} t - target
+	 * @param {import("./lib/types").ApiData} t - target
 	 * @returns {string} key
 	 */
 	targetKey(t) {
@@ -278,7 +287,7 @@ class UltimateUpdater extends utils.Adapter {
 	 *
 	 * @param {string} id - object id
 	 * @param {"state" | "channel" | "device" | "folder"} type - object type
-	 * @param {Record<string, any>} common - common part
+	 * @param {Record<string, import("./lib/types").ApiData>} common - common part
 	 */
 	async ensureObject(id, type, common) {
 		const sig = `${type}|${JSON.stringify(common)}`;
@@ -309,7 +318,7 @@ class UltimateUpdater extends utils.Adapter {
 	 *
 	 * @param {string} key - field name
 	 * @param {"boolean" | "number" | "string"} type - value type
-	 * @param {any} val - current value
+	 * @param {import("./lib/types").ApiData} val - current value
 	 * @returns {string} state role
 	 */
 	roleFor(key, type, val) {
@@ -330,7 +339,7 @@ class UltimateUpdater extends utils.Adapter {
 	 *
 	 * @param {string} id - state id
 	 * @param {string} name - name
-	 * @param {any} val - value
+	 * @param {import("./lib/types").ApiData} val - value
 	 * @param {Partial<ioBroker.StateCommon>} [common] - common overrides
 	 */
 	async value(id, name, val, common = {}) {
@@ -350,7 +359,19 @@ class UltimateUpdater extends utils.Adapter {
 			return;
 		}
 		const type = typeof val === "boolean" ? "boolean" : typeof val === "number" ? "number" : "string";
-		const role = this.roleFor(String(id.split(".").pop()), type, val);
+		let role = this.roleFor(String(id.split(".").pop()), type, val);
+		// keep a time role once it was chosen, so a value like "never" does not flip the object between date and text
+		const known = this.objCache.get(id); // "state|<common as JSON>"
+		if (known && !common.role) {
+			try {
+				const prev = JSON.parse(known.slice(known.indexOf("|") + 1));
+				if ((prev.role === "date" || prev.role === "value.time") && prev.type === type) {
+					role = prev.role;
+				}
+			} catch {
+				// unreadable cache entry: keep the computed role
+			}
+		}
 		await this.ensureObject(id, "state", { name, type, role, read: true, write: false, ...common });
 		await this.setStateChangedAsync(id, val, true);
 	}
@@ -374,7 +395,7 @@ class UltimateUpdater extends utils.Adapter {
 	 * Writes all fields of an object as states; nested objects become channels, arrays JSON strings.
 	 *
 	 * @param {string} prefix - parent id
-	 * @param {Record<string, any>} obj - data
+	 * @param {Record<string, import("./lib/types").ApiData>} obj - data
 	 */
 	async flatten(prefix, obj) {
 		for (const [key, val] of Object.entries(obj)) {
@@ -415,7 +436,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Notifies new security updates and new reboot requirements (only on changes).
 	 *
-	 * @param {any[]} targets - targets from /api/status
+	 * @param {import("./lib/types").ApiData[]} targets - targets from /api/status
 	 */
 	async notifyTargets(targets) {
 		const first = !this.notified;
@@ -444,7 +465,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Notifies failed/interrupted jobs once.
 	 *
-	 * @param {any[]} jobs - jobs from /api/jobs
+	 * @param {import("./lib/types").ApiData[]} jobs - jobs from /api/jobs
 	 */
 	async notifyJobs(jobs) {
 		if (!this.notified) {
@@ -488,7 +509,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Shut down guest? Web UI status has "status"; API v1 reports it via skip_reason/check_status.
 	 *
-	 * @param {any} t - target
+	 * @param {import("./lib/types").ApiData} t - target
 	 * @returns {boolean} true if the VM/CT is shut down
 	 */
 	isStopped(t) {
@@ -500,7 +521,7 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
-	 * @param {any} t - target
+	 * @param {import("./lib/types").ApiData} t - target
 	 * @returns {boolean} excluded from the collective update buttons
 	 */
 	isExcluded(t) {
@@ -615,13 +636,13 @@ class UltimateUpdater extends utils.Adapter {
 		const wasRunning = this.jobRunning;
 		try {
 			await this.queue(() => this.refreshJobs());
-			await this.setState("info.connection", true, true);
+			await this.setStateChangedAsync("info.connection", true, true);
 		} catch (e) {
 			if (this.unloading) {
 				return;
 			}
 			this.log.warn(`Job status check failed: ${e.message}`);
-			await this.setState("info.connection", false, true);
+			await this.setStateChangedAsync("info.connection", false, true);
 			return;
 		}
 		if (wasRunning && !this.jobRunning) {
@@ -689,7 +710,7 @@ class UltimateUpdater extends utils.Adapter {
 	/**
 	 * Latest job per target as states of the target (jobState, jobUnit).
 	 *
-	 * @param {any[]} jobs - jobs from /api/jobs
+	 * @param {import("./lib/types").ApiData[]} jobs - jobs from /api/jobs
 	 */
 	async writeTargetJobs(jobs) {
 		const ts = j => Date.parse(j.started_at || j.finished_at || "") || 0;
@@ -720,21 +741,28 @@ class UltimateUpdater extends utils.Adapter {
 
 				await this.value("info.lastRefresh", "Last refresh", Date.now(), { role: "value.time" });
 				await this.value("info.schemaVersion", "Status schema version", String(status.schema_version ?? ""));
-				await this.value("info.generatedAt", "Status generated at (server)", String(status.generated_at ?? ""));
+				await this.value(
+					"info.generatedAt",
+					"Status generated at (server)",
+					String(status.generated_at ?? ""),
+					{
+						role: "date",
+					},
+				);
 				await this.value("info.targetCount", "Number of targets", targets.length);
 
 				await this.writeSummary(targets);
 				await this.writeTargets(targets);
 				await this.refreshJobs();
 				await this.refreshVersion();
-				await this.setState("info.connection", true, true);
+				await this.setStateChangedAsync("info.connection", true, true);
 				this.log.debug(`Status refreshed: ${targets.length} targets`);
 			} catch (e) {
 				if (this.unloading) {
 					return;
 				}
 				this.log.error(`Status refresh failed: ${e.message}`);
-				await this.setState("info.connection", false, true);
+				await this.setStateChangedAsync("info.connection", false, true);
 			}
 		});
 	}
@@ -760,7 +788,7 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
-	 * @param {any[]} targets - targets from /api/status
+	 * @param {import("./lib/types").ApiData[]} targets - targets from /api/status
 	 */
 	async writeSummary(targets) {
 		const name = t => t.name || t.id;
@@ -817,7 +845,7 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
-	 * @param {any[]} targets - targets from /api/status
+	 * @param {import("./lib/types").ApiData[]} targets - targets from /api/status
 	 */
 	async writeTargets(targets) {
 		const current = new Map();
@@ -866,7 +894,7 @@ class UltimateUpdater extends utils.Adapter {
 	 * Runs an action unless a job is already running.
 	 *
 	 * @param {string} label - log label
-	 * @param {() => Promise<any>} fn - action
+	 * @param {() => Promise<import("./lib/types").ApiData>} fn - action
 	 */
 	async action(label, fn) {
 		if (this.bulk) {
@@ -1133,7 +1161,7 @@ class UltimateUpdater extends utils.Adapter {
 	 *
 	 * @param {() => void} callback - Callback function
 	 */
-	onUnload(callback) {
+	async onUnload(callback) {
 		this.unloading = true;
 		try {
 			if (this.refreshTimer) {
@@ -1149,12 +1177,14 @@ class UltimateUpdater extends utils.Adapter {
 			const client = this.client;
 			this.client = null;
 			if (client) {
-				// best effort, do not delay the unload (the session expires on the server anyway)
-				client.logout().catch(() => {});
+				// abort running requests, end the Web UI session (at most 2 s), then refuse new requests
+				client.abort();
+				await client.logout().catch(() => {});
+				client.close();
 			}
-			callback();
 		} catch (error) {
 			this.log.error(`Error during unloading: ${error.message}`);
+		} finally {
 			callback();
 		}
 	}

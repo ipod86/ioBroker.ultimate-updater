@@ -15,7 +15,7 @@
 
 Holt den Update-Status deiner Proxmox-Hosts, LXC-Container und VMs in ioBroker und startet Prüfungen und Updates per Knopfdruck.
 
-Der Adapter ist ein Client für den **[Ultimate Updater](https://github.com/BassT23/Proxmox) von [@BassT23](https://github.com/BassT23)**. Der Ultimate Updater erledigt die eigentliche Arbeit auf dem Proxmox-Cluster (Updates, Snapshots/Backups, Filter, Statusmodell); dieser Adapter liest nur dessen Web-UI-API und löst die dort angebotenen Aktionen aus. Vielen Dank an BassT23 für die Erlaubnis, den Namen zu verwenden.
+Der Adapter ist ein Client für den **[Ultimate Updater](https://github.com/BassT23/Proxmox) von [@BassT23](https://github.com/BassT23)**. Der Ultimate Updater erledigt die eigentliche Arbeit auf dem Proxmox-Cluster (Updates, Snapshots/Backups, Filter, Statusmodell); dieser Adapter liest nur dessen Status (Integrations-API v1 mit Token oder die Web-UI-API) und löst die dort angebotenen Aktionen aus. Vielen Dank an BassT23 für die Erlaubnis, den Namen zu verwenden.
 
 Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
 
@@ -23,6 +23,7 @@ Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultim
 
 ### Voraussetzungen
 
+- Node.js >= 22, js-controller >= 6.0.11, Admin >= 7.8.23 (der Credentials-Manager braucht Admin 7.9)
 - Ultimate Updater **5.1.3 oder neuer** mit aktivierter Web-UI (Standardport `8765`)
 - Eine von zwei Anmeldearten:
   - **API-Token (empfohlen, Ultimate Updater 5.2 / derzeit der `develop`-Zweig):** die Integrations-API v1 mit Bearer-Token und eigenen Rechten. Nur über HTTPS. Auf dem Proxmox-Host:
@@ -105,7 +106,7 @@ Mit Ultimate Updater 5.2 umgeht der **API-Token** all das: Er gewährt keinen Pr
 
 ### Hinweis zur API
 
-Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Eine dokumentierte, versionierte API mit Token-Anmeldung wird upstream besprochen ([BassT23/Proxmox#378](https://github.com/BassT23/Proxmox/issues/378)); der Adapter stellt darauf um, sobald sie verfügbar ist.
+Mit „API-Token“ nutzt der Adapter die dokumentierte, versionierte Integrations-API v1 von Ultimate Updater 5.2 (Bearer-Token, eigene Rechte, nur HTTPS), die zusammen mit BassT23 entworfen wurde ([BassT23/Proxmox#378](https://github.com/BassT23/Proxmox/issues/378)). Mit „Web-UI-Login“ nutzt er die Endpunkte der Weboberfläche; die sind keine stabile Schnittstelle und können sich zwischen Ultimate-Updater-Versionen ändern – besser den API-Token verwenden.
 
 ## Changelog
 <!--
@@ -114,11 +115,11 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 -->
 
 ### **WORK IN PROGRESS**
+* (ipod86) Warnung, wenn das Proxmox-Passwort ohne HTTPS übertragen würde; laufende Anfragen werden beim Stoppen abgebrochen; feste Rollen für Zeitfelder; `info.connection` nur bei Änderung geschrieben; README und Übersetzungen der News korrigiert
 * (ipod86) Benachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“), damit gleichnamige Ziele unterscheidbar sind
 
 
 ### 0.0.2 (2026-10-21)
-* (ipod86) Erste Version
 * (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
 * (ipod86) Security-Update-Button klarer beschrieben; Sicherheitshinweise in der README
 * (ipod86) Einstellung, ob Sammel-Updates auch ausgeschaltete VMs/CTs umfassen (Standard: nur laufende)
