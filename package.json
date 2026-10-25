@@ -1,6 +1,6 @@
 {
   "name": "iobroker.ultimate-updater",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
   "author": {
     "name": "ipod86",

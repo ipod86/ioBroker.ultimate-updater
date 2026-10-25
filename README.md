@@ -107,7 +107,7 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.1.0 (2026-10-25)
 * (ipod86) **Breaking:** only the API token (integration API v1, Ultimate Updater 5.2+) is supported; the Web UI login with a Proxmox user was removed
 * (ipod86) warning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields; `info.connection` only written on changes; README and translations of the news corrected
 * (ipod86) notifications name the target with ID and name ("115 · iobroker"), so targets with the same name can be told apart

@@ -107,7 +107,7 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 	### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.1.0 (2026-10-25)
 * (ipod86) **Breaking:** nur noch Anmeldung per API-Token (Integrations-API v1, Ultimate Updater 5.2+); der Web-UI-Login mit Proxmox-Benutzer wurde entfernt
 * (ipod86) Warnung, wenn HTTPS abgeschaltet ist; laufende Anfragen werden beim Stoppen abgebrochen; feste Rollen für Zeitfelder; `info.connection` nur bei Änderung geschrieben; README und Übersetzungen der News korrigiert
 * (ipod86) Benachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“), damit gleichnamige Ziele unterscheidbar sind
