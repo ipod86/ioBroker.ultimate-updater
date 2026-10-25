@@ -112,6 +112,10 @@ The adapter currently uses the Ultimate Updater Web UI endpoints. A documented, 
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (ipod86) notifications name the target with ID and name ("115 · iobroker"), so targets with the same name can be told apart
+
 ### 0.0.2 (2026-10-21)
 * (ipod86) initial release
 * (ipod86) collective updates run one target after the other (waiting for each job), progress in `bulk.*`

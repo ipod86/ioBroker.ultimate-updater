@@ -11,7 +11,7 @@
 const utils = require("@iobroker/adapter-core");
 const { Credentials } = require("@iobroker/adapter-core");
 const { UuClient, BUSY_STATES, FAILURE_STATES } = require("./lib/uu-client");
-const { buildReport } = require("./lib/report");
+const { buildReport, label } = require("./lib/report");
 const { texts } = require("./lib/i18n");
 
 const MAX_TIMEOUT_S = 2147483; // setTimeout limit (~24.8 days)
@@ -424,7 +424,7 @@ class UltimateUpdater extends utils.Adapter {
 		const reboot = [];
 		for (const t of targets) {
 			const id = String(t.id);
-			const name = t.name || id;
+			const name = label(t);
 			const n = Number(t.security_updates) || 0;
 			sec[id] = n;
 			if (!first && this.config.notifySecurity !== false && n > (prev.sec[id] || 0)) {
@@ -471,7 +471,7 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
-	 * Display name of a job target ("lxc:101" → name of the target).
+	 * Display name of a job target for notifications ("115 · iobroker", host: node name).
 	 *
 	 * @param {string} target - job target
 	 * @returns {string} name
@@ -479,10 +479,10 @@ class UltimateUpdater extends utils.Adapter {
 	targetName(target) {
 		for (const t of this.targets.values()) {
 			if (t.id === target || `host:${t.node}` === target || (t.type === "host" && t.node === target)) {
-				return t.name || t.id;
+				return label(t);
 			}
 		}
-		return String(target || "?");
+		return target ? label({ id: target }) : "?";
 	}
 
 	/**

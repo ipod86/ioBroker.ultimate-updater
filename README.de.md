@@ -113,6 +113,10 @@ Der Adapter nutzt derzeit die Endpunkte der Ultimate-Updater-Weboberfläche. Ein
 	### **WORK IN PROGRESS**
 -->
 
+### **WORK IN PROGRESS**
+* (ipod86) Benachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“), damit gleichnamige Ziele unterscheidbar sind
+
+
 ### 0.0.2 (2026-10-21)
 * (ipod86) Erste Version
 * (ipod86) Sammel-Updates laufen nacheinander (Warten auf jeden Job), Fortschritt in `bulk.*`
