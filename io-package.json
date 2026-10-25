@@ -1,8 +1,21 @@
 {
 	"common": {
 		"name": "ultimate-updater",
-		"version": "0.1.0",
+		"version": "0.1.1",
 		"news": {
+			"0.1.1": {
+				"en": "release published by the GitHub workflow (trusted publishing); news only for versions on npm; normalized repository URL",
+				"de": "Release über den GitHub-Workflow veröffentlicht (Trusted Publishing); News nur für Versionen auf npm; vereinheitlichte Repository-URL",
+				"ru": "выпуск опубликован через GitHub workflow (trusted publishing); новости только для версий на npm; нормализованный URL репозитория",
+				"pt": "versão publicada pelo workflow do GitHub (trusted publishing); notícias apenas para versões no npm; URL do repositório normalizado",
+				"nl": "release gepubliceerd via de GitHub-workflow (trusted publishing); nieuws alleen voor versies op npm; genormaliseerde repository-URL",
+				"fr": "version publiée par le workflow GitHub (trusted publishing) ; nouveautés uniquement pour les versions sur npm ; URL du dépôt normalisée",
+				"it": "release pubblicata dal workflow GitHub (trusted publishing); novità solo per le versioni su npm; URL del repository normalizzato",
+				"es": "versión publicada por el workflow de GitHub (trusted publishing); novedades solo para versiones en npm; URL del repositorio normalizada",
+				"pl": "wydanie opublikowane przez workflow GitHub (trusted publishing); nowości tylko dla wersji na npm; znormalizowany adres URL repozytorium",
+				"uk": "випуск опубліковано через GitHub workflow (trusted publishing); новини лише для версій на npm; нормалізована URL-адреса репозиторію",
+				"zh-cn": "通过 GitHub 工作流发布（可信发布）；新闻仅保留 npm 上已有的版本；规范化仓库 URL"
+			},
 			"0.1.0": {
 				"en": "Breaking: only the API token (integration API v1, Ultimate Updater 5.2+) is supported, the Web UI login with a Proxmox user was removed\nnotifications name the target with ID and name (\"115 · iobroker\")\nwarning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields",
 				"de": "Breaking: nur noch Anmeldung per API-Token (Integrations-API v1, Ultimate Updater 5.2+), der Web-UI-Login mit Proxmox-Benutzer wurde entfernt\nBenachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“)\nWarnung, wenn HTTPS abgeschaltet ist; laufende Anfragen werden beim Stoppen abgebrochen; feste Rollen für Zeitfelder",
