@@ -107,7 +107,7 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 	### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.1.2 (2026-11-12)
 * (ipod86) fix: Objektfelder der API (z. B. `error`, `skip_reason`) sind immer Channels; null leert deren Datenpunkte; fehlerhafte Objekte werden beim Start repariert
 * (ipod86) fix: Log-Meldungen der Benachrichtigungen immer auf Englisch
 * (ipod86) fix: unbehandelte Promise-Rejections in Hintergrundaufgaben; Wartezeiten enden beim Stoppen sofort
