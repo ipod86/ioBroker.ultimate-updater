@@ -32,16 +32,16 @@
 		},
 		"titleLang": {
 			"en": "Ultimate Updater",
-			"de": "Ultimativer Updater",
+			"de": "Ultimate Updater",
 			"ru": "Ultimate Updater",
-			"pt": "Atualizador final",
-			"nl": "Ultieme updater",
-			"fr": "Programme de mise à jour ultime",
-			"it": "Aggiornamento definitivo",
-			"es": "Actualizador definitivo",
-			"pl": "Ostateczny aktualizator",
-			"uk": "Остаточний засіб оновлення",
-			"zh-cn": "终极更新程序"
+			"pt": "Ultimate Updater",
+			"nl": "Ultimate Updater",
+			"fr": "Ultimate Updater",
+			"it": "Ultimate Updater",
+			"es": "Ultimate Updater",
+			"pl": "Ultimate Updater",
+			"uk": "Ultimate Updater",
+			"zh-cn": "Ultimate Updater"
 		},
 		"desc": {
 			"en": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
@@ -99,7 +99,7 @@
 		"messagebox": true
 	},
 	"native": {
-		"ip": "192.168.1.10",
+		"ip": "",
 		"port": 8765,
 		"https": true,
 		"credentialMode": "manual",

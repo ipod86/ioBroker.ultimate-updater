@@ -15,9 +15,9 @@
 
 Brings the update status of your Proxmox hosts, LXC containers and VMs into ioBroker and lets you start checks and updates with a button.
 
-The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Proxmox) by [@BassT23](https://github.com/BassT23)**. Ultimate Updater does the actual work on your Proxmox cluster (update execution, snapshots/backups, filters, status model); this adapter only reads its status via the integration API v1 and triggers the actions it offers. Many thanks to BassT23 for the permission to use the name.
+The adapter is a client for **[Ultimate Updater](https://github.com/BassT23/Proxmox) by [@BassT23](https://github.com/BassT23)**. Ultimate Updater does the actual work on your Proxmox cluster (update execution, snapshots/backups, filters, status model); this adapter only reads its status via the integration API v1 and triggers the actions it offers. Name and icon are used with the permission of [@BassT23](https://github.com/BassT23) – many thanks!
 
-The adapter icon is the Ultimate Updater icon by BassT23 ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
+The adapter icon is the original Ultimate Updater icon by BassT23, used with his permission ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
 
 > **Unofficial community adapter.** It is not affiliated with Ultimate Updater or Proxmox Server Solutions GmbH. Proxmox® is a registered trademark of Proxmox Server Solutions GmbH.
 
@@ -106,6 +106,13 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (ipod86) fix: object fields of the API (e.g. `error`, `skip_reason`) are always channels; null clears their states; broken objects are repaired on start
+* (ipod86) fix: log messages of notifications are always English
+* (ipod86) fix: unhandled promise rejections in background tasks; waits end right away on stop
+* (ipod86) fix: no default IP address, a missing address is reported
+* (ipod86) chore: only the buttons are subscribed; title "Ultimate Updater" in all languages; README notes the permission for name and icon
 
 ### 0.1.1 (2026-10-25)
 * (ipod86) release published by the GitHub workflow (trusted publishing); news only for versions on npm; normalized repository URL

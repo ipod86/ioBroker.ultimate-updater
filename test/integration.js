@@ -237,10 +237,33 @@ tests.integration(path.join(__dirname, ".."), {
 				obj.encryptedNative = require("../io-package.json").encryptedNative;
 				obj.protectedNative = require("../io-package.json").protectedNative;
 				await harness.objects.setObjectAsync(obj._id, obj);
+				// broken objects of 0.1.1: a channel with state attributes and a value written onto it
+				await harness.objects.setObjectAsync(`${NS}.targets.web_lxc_101`, {
+					type: "device",
+					common: { name: "web (lxc)" },
+					native: {},
+				});
+				await harness.objects.setObjectAsync(`${NS}.targets.web_lxc_101.error`, {
+					type: "channel",
+					common: { name: "error", type: "string", role: "text", read: true, write: false },
+					native: {},
+				});
+				await harness.states.setStateAsync(`${NS}.targets.web_lxc_101.error`, { val: null, ack: true });
 				await harness.startAdapterAndWait();
 				await wait(3000);
 			});
 			after(() => mock && mock.server.close());
+
+			it("repairs channels with state attributes and keeps object fields as channels", async () => {
+				const err = await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.error`);
+				expect(err.type).to.equal("channel");
+				expect(err.common).to.not.have.any.keys("type", "role", "read", "write");
+				expect(await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.error`)).to.equal(null);
+				const code = await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.error.code`);
+				expect(code && code.type).to.equal("state");
+				const skip = await harness.objects.getObjectAsync(`${NS}.targets.web_lxc_101.skip_reason`);
+				expect(skip && skip.type).to.equal("channel");
+			});
 
 			it("reads the status via /api/v1 and maps skip_reason", async () => {
 				expect(mock.state.v1Calls.some(c => c[1] === "/api/v1/status")).to.equal(true);
@@ -263,6 +286,25 @@ tests.integration(path.join(__dirname, ".."), {
 				const progress = await harness.states.getStateAsync(`${NS}.bulk.progress`);
 				expect(progress && progress.val).to.equal("1 ok, 1 unchanged, 0 failed, 0 not started, 1 shut down skipped");
 				mock.state.finalStates = {};
+			});
+
+			it("keeps the object type when an object field changes between null and object", async function () {
+				this.timeout(20000);
+				mock.state.autoCompleteMs = 500;
+				const backup = mock.state.targets.find(t => t.id === "lxc:105");
+				delete backup.status; // running again → skip_reason: null
+				mock.state.targets.find(t => t.id === "lxc:101").error = { code: "UPDATE_FAILED", message: "boom" };
+				// a finished job triggers a full status refresh
+				await harness.states.setStateAsync(`${NS}.targets.web_lxc_101.updateNow`, true, false);
+				await wait(6000);
+				const skip = await harness.objects.getObjectAsync(`${NS}.targets.backup_lxc_105.skip_reason`);
+				expect(skip.type).to.equal("channel");
+				expect(skip.common).to.not.have.any.keys("type", "role");
+				const code = await harness.states.getStateAsync(`${NS}.targets.backup_lxc_105.skip_reason.code`);
+				expect(code && code.val).to.equal(null);
+				const err = await harness.states.getStateAsync(`${NS}.targets.web_lxc_101.error.code`);
+				expect(err && err.val).to.equal("UPDATE_FAILED");
+				expect(await harness.states.getStateAsync(`${NS}.targets.backup_lxc_105.skip_reason`)).to.equal(null);
 			});
 
 			it("checks a host via check-node with an empty body", async () => {

@@ -15,9 +15,9 @@
 
 Holt den Update-Status deiner Proxmox-Hosts, LXC-Container und VMs in ioBroker und startet Prüfungen und Updates per Knopfdruck.
 
-Der Adapter ist ein Client für den **[Ultimate Updater](https://github.com/BassT23/Proxmox) von [@BassT23](https://github.com/BassT23)**. Der Ultimate Updater erledigt die eigentliche Arbeit auf dem Proxmox-Cluster (Updates, Snapshots/Backups, Filter, Statusmodell); dieser Adapter liest nur dessen Status über die Integrations-API v1 und löst die dort angebotenen Aktionen aus. Vielen Dank an BassT23 für die Erlaubnis, den Namen zu verwenden.
+Der Adapter ist ein Client für den **[Ultimate Updater](https://github.com/BassT23/Proxmox) von [@BassT23](https://github.com/BassT23)**. Der Ultimate Updater erledigt die eigentliche Arbeit auf dem Proxmox-Cluster (Updates, Snapshots/Backups, Filter, Statusmodell); dieser Adapter liest nur dessen Status über die Integrations-API v1 und löst die dort angebotenen Aktionen aus. Name und Icon werden mit Erlaubnis von [@BassT23](https://github.com/BassT23) verwendet – vielen Dank!
 
-Das Adapter-Icon ist das Ultimate-Updater-Icon von BassT23 ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
+Das Adapter-Icon ist das originale Ultimate-Updater-Icon von BassT23, verwendet mit seiner Erlaubnis ([web-ui/assets/ultimate-updater-icon.png](https://github.com/BassT23/Proxmox/blob/master/web-ui/assets/ultimate-updater-icon.png)).
 
 > **Inoffizieller Community-Adapter.** Er steht in keiner Verbindung zum Ultimate Updater oder zur Proxmox Server Solutions GmbH. Proxmox® ist eine eingetragene Marke der Proxmox Server Solutions GmbH.
 
@@ -106,6 +106,13 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (ipod86) fix: Objektfelder der API (z. B. `error`, `skip_reason`) sind immer Channels; null leert deren Datenpunkte; fehlerhafte Objekte werden beim Start repariert
+* (ipod86) fix: Log-Meldungen der Benachrichtigungen immer auf Englisch
+* (ipod86) fix: unbehandelte Promise-Rejections in Hintergrundaufgaben; Wartezeiten enden beim Stoppen sofort
+* (ipod86) fix: keine Standard-IP-Adresse mehr, eine fehlende Adresse wird gemeldet
+* (ipod86) chore: nur noch die Buttons abonniert; Titel „Ultimate Updater“ in allen Sprachen; README nennt die Erlaubnis für Name und Icon
 
 ### 0.1.1 (2026-10-25)
 * (ipod86) Release über den GitHub-Workflow veröffentlicht (Trusted Publishing); News nur für Versionen auf npm; vereinheitlichte Repository-URL

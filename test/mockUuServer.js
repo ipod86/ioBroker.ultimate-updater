@@ -65,7 +65,7 @@ function startMock() {
 		return {
 			...rest,
 			check_status: stopped ? "not_checked" : rest.check_status || "ok",
-			error: null,
+			error: rest.error || null,
 			skip_reason: stopped ? { code: "STOPPED_READ_ONLY", message: `${t.id} is stopped; the check did not start it` } : null,
 		};
 	};

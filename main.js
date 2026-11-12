@@ -16,6 +16,22 @@ const { texts } = require("./lib/i18n");
 
 const MAX_TIMEOUT_S = 2147483; // setTimeout limit (~24.8 days)
 
+/**
+ * API fields that hold an object or null. They are always a channel with these fixed child states;
+ * null clears the child states (the object type of an id must never change between state and channel).
+ */
+const OBJECT_FIELDS = {
+	error: ["code", "message"],
+	skip_reason: ["code", "message"],
+	last_update: ["status", "timestamp", "exit_code", "pending_before", "message"],
+	package_freshness: ["state", "checked_at", "age_seconds"],
+	updates: ["available"],
+	windows_update: ["source", "queried_at", "history"],
+};
+
+/** attributes that only belong to states (removed from channels/devices/folders) */
+const STATE_ATTRIBUTES = ["type", "role", "read", "write", "def", "min", "max", "unit", "states"];
+
 class UltimateUpdater extends utils.Adapter {
 	/**
 	 * @param {Partial<utils.AdapterOptions>} [options] - Adapter options
@@ -39,6 +55,12 @@ class UltimateUpdater extends utils.Adapter {
 		this.targets = new Map();
 		this.unloading = false;
 		this.T = texts("en");
+		/** English texts for log messages (logs are never translated) */
+		this.TEN = texts("en");
+		/** channels of object fields whose states were cleared (API sent null) */
+		this.clearedChannels = new Set();
+		/** pending wait() calls, ended on unload */
+		this.waiters = new Set();
 		/** last notified state (null = first run) */
 		this.notified = null;
 		this.notifiedJobsInitialised = false;
@@ -86,6 +108,7 @@ class UltimateUpdater extends utils.Adapter {
 		const sys = await this.getForeignObjectAsync("system.config");
 		this.T = texts((sys && sys.common && sys.common.language) || "en");
 
+		await this.repairObjects();
 		await this.createStaticObjects();
 		const ns = await this.getStateAsync("info.notifyState");
 		try {
@@ -95,7 +118,19 @@ class UltimateUpdater extends utils.Adapter {
 		}
 		// with a persisted state, failures that happened while the adapter was stopped are new and get notified
 		this.notifiedJobsInitialised = !!this.notified;
-		this.subscribeStates("*");
+		// only the buttons handled in onStateChange
+		for (const pattern of [
+			"checkAll",
+			"updateAllVmsCts",
+			"updateSecurityOnly",
+			"bulk.stop",
+			"jobs.*.cancel",
+			"targets.*.updateNow",
+			"targets.*.checkNow",
+			"targets.*.reboot",
+		]) {
+			this.subscribeStates(pattern);
+		}
 
 		if (this.config.credentialMode === "manager") {
 			await this.watchCredential();
@@ -163,7 +198,7 @@ class UltimateUpdater extends utils.Adapter {
 					if (this.client) {
 						this.client.setToken(cred.values.key);
 					}
-					this.refreshStatus();
+					this.refreshStatus().catch(e => this.log.warn(`Status refresh failed: ${e.message}`));
 				},
 			);
 		} catch (e) {
@@ -256,8 +291,87 @@ class UltimateUpdater extends utils.Adapter {
 		if (this.objCache.get(id) === sig) {
 			return;
 		}
+		const existingType = await this.objectType(id);
+		if (existingType && existingType !== type) {
+			// never change the type in place: extendObject would merge state attributes into a channel
+			// and a state must not keep the children of a former channel
+			this.log.debug(`Object ${id} changes from ${existingType} to ${type} – recreating it`);
+			await this.removeObject(id, true);
+		}
 		await this.extendObject(id, { type, common, native: {} });
 		this.objCache.set(id, sig);
+	}
+
+	/**
+	 * Type of an existing object (from the cache, otherwise from the object database).
+	 *
+	 * @param {string} id - object id
+	 * @returns {Promise<string | null>} object type or null if the object does not exist
+	 */
+	async objectType(id) {
+		const known = this.objCache.get(id);
+		if (known) {
+			return known.slice(0, known.indexOf("|"));
+		}
+		const obj = await this.getObjectAsync(id);
+		return obj ? obj.type : null;
+	}
+
+	/**
+	 * Repairs objects of older versions: channels/devices/folders that carry state attributes
+	 * (an API field that was a state first and an object later) and states that have children.
+	 */
+	async repairObjects() {
+		try {
+			// getForeignObjects returns only states without a type → read every type
+			/** all objects of this instance */
+			const objs = {};
+			for (const type of ["state", "channel", "device", "folder"]) {
+				Object.assign(objs, await this.getForeignObjectsAsync(`${this.namespace}.*`, type));
+			}
+			const ids = Object.keys(objs);
+			for (const [fullId, obj] of Object.entries(objs)) {
+				if (!obj || !obj.common) {
+					continue;
+				}
+				const id = fullId.slice(this.namespace.length + 1);
+				if (["channel", "device", "folder"].includes(obj.type)) {
+					if (STATE_ATTRIBUTES.some(a => a in obj.common)) {
+						const repaired = JSON.parse(JSON.stringify(obj)); // deep copy of the stored object
+						for (const a of STATE_ATTRIBUTES) {
+							delete repaired.common[a];
+						}
+						await this.setForeignObjectAsync(fullId, repaired);
+						// a value that was written onto the channel
+						await this.delStateAsync(id).catch(() => {});
+						this.log.debug(`Repaired ${obj.type} ${id} (removed state attributes)`);
+					}
+				} else if (obj.type === "state" && ids.some(other => other.startsWith(`${fullId}.`))) {
+					// a state must not have children: the field is an object → make it a channel
+					await this.delObjectAsync(id);
+					await this.setObjectAsync(id, {
+						type: "channel",
+						common: { name: obj.common.name || String(id.split(".").pop()) },
+						native: {},
+					});
+					this.log.debug(`Repaired state ${id} with children (now a channel)`);
+				}
+			}
+		} catch (e) {
+			this.log.warn(`Object repair failed: ${e.message}`);
+		}
+	}
+
+	/**
+	 * Sets all states below a channel to null (the API sent null for an object field).
+	 *
+	 * @param {string} id - channel id
+	 */
+	async clearChildren(id) {
+		const children = await this.getForeignObjectsAsync(`${this.namespace}.${id}.*`, "state");
+		for (const childId of Object.keys(children)) {
+			await this.setForeignStateChangedAsync(childId, null, true);
+		}
 	}
 
 	/**
@@ -268,6 +382,11 @@ class UltimateUpdater extends utils.Adapter {
 	 */
 	async removeObject(id, recursive = false) {
 		await this.delObjectAsync(id, recursive ? { recursive: true } : undefined);
+		for (const ch of [...this.clearedChannels]) {
+			if (ch === id || ch.startsWith(`${id}.`)) {
+				this.clearedChannels.delete(ch);
+			}
+		}
 		for (const key of [...this.objCache.keys()]) {
 			if (key === id || (recursive && key.startsWith(`${id}.`))) {
 				this.objCache.delete(key);
@@ -307,7 +426,11 @@ class UltimateUpdater extends utils.Adapter {
 	async value(id, name, val, common = {}) {
 		if (val === null || val === undefined) {
 			// unknown value: keep type/role of an existing state, create new ones as text
-			if (!this.objCache.has(id) && !(await this.getObjectAsync(id))) {
+			const existingType = await this.objectType(id);
+			if (existingType && existingType !== "state") {
+				return; // never write a value onto a channel
+			}
+			if (!existingType) {
 				await this.ensureObject(id, "state", {
 					name,
 					type: "string",
@@ -360,11 +483,35 @@ class UltimateUpdater extends utils.Adapter {
 	 * @param {Record<string, import("./lib/types").ApiData>} obj - data
 	 */
 	async flatten(prefix, obj) {
-		for (const [key, val] of Object.entries(obj)) {
+		for (const [key, raw] of Object.entries(obj)) {
 			const id = `${prefix}.${this.sanitize(key)}`;
+			const fixed = Object.prototype.hasOwnProperty.call(OBJECT_FIELDS, key) ? OBJECT_FIELDS[key] : null;
+			let val = raw;
+			if (fixed && val !== null && val !== undefined && (typeof val !== "object" || Array.isArray(val))) {
+				// unexpected plain value for an object field: keep the channel, store it in a child state
+				const child = fixed.includes("message") ? "message" : fixed[0];
+				val = { [child]: Array.isArray(val) ? JSON.stringify(val) : val };
+			}
 			if (val !== null && typeof val === "object" && !Array.isArray(val)) {
 				await this.channel(id, key);
+				this.clearedChannels.delete(id);
 				await this.flatten(id, val);
+				// fixed child states the API left out are cleared
+				for (const child of fixed || []) {
+					if (!(child in val)) {
+						await this.value(`${id}.${this.sanitize(child)}`, child, null);
+					}
+				}
+			} else if ((val === null || val === undefined) && (fixed || (await this.objectType(id)) === "channel")) {
+				// object field without content: keep the channel, clear its states
+				await this.channel(id, key);
+				for (const child of fixed || []) {
+					await this.value(`${id}.${this.sanitize(child)}`, child, null);
+				}
+				if (!this.clearedChannels.has(id)) {
+					await this.clearChildren(id);
+					this.clearedChannels.add(id);
+				}
 			} else if (Array.isArray(val)) {
 				await this.value(id, key, JSON.stringify(val), { role: "json" });
 			} else {
@@ -379,12 +526,13 @@ class UltimateUpdater extends utils.Adapter {
 	 * Sends a notification via the ioBroker notification manager.
 	 *
 	 * @param {"securityUpdates" | "jobFailed" | "rebootRequired"} category - notification category
-	 * @param {string} msg - text in the system language
+	 * @param {(T: ReturnType<typeof texts>) => string} text - builds the text from the given language texts
 	 */
-	async notify(category, msg) {
-		this.log.info(`Notification (${category}): ${msg}`);
+	async notify(category, text) {
+		// the log is always English, the notification uses the system language
+		this.log.info(`Notification (${category}): ${text(this.TEN)}`);
 		try {
-			await this.registerNotification("ultimate-updater", category, msg);
+			await this.registerNotification("ultimate-updater", category, text(this.T));
 		} catch (e) {
 			this.log.warn(`Notification could not be sent: ${e.message}`);
 		}
@@ -411,12 +559,12 @@ class UltimateUpdater extends utils.Adapter {
 			const n = Number(t.security_updates) || 0;
 			sec[id] = n;
 			if (!first && this.config.notifySecurity !== false && n > (prev.sec[id] || 0)) {
-				await this.notify("securityUpdates", this.T.security(name, n));
+				await this.notify("securityUpdates", T => T.security(name, n));
 			}
 			if (t.reboot_required === true) {
 				reboot.push(id);
 				if (!first && this.config.notifyReboot !== false && !prev.reboot.includes(id)) {
-					await this.notify("rebootRequired", this.T.reboot(name));
+					await this.notify("rebootRequired", T => T.reboot(name));
 				}
 			}
 		}
@@ -440,7 +588,7 @@ class UltimateUpdater extends utils.Adapter {
 			if (!known.has(j.unit)) {
 				// failures that already existed when the adapter started are not notified
 				if (this.config.notifyJobFailed !== false && this.notifiedJobsInitialised) {
-					await this.notify("jobFailed", this.T.jobFailed(this.targetName(j.target), j.state));
+					await this.notify("jobFailed", T => T.jobFailed(this.targetName(j.target), j.state));
 				}
 				changed = true;
 			}
@@ -560,7 +708,9 @@ class UltimateUpdater extends utils.Adapter {
 		this.refreshTimer = this.setTimeout(
 			() => {
 				this.refreshTimer = null;
-				this.refreshStatus().finally(() => !this.unloading && this.scheduleRefresh());
+				this.refreshStatus()
+					.catch(e => this.log.warn(`Status refresh failed: ${e.message}`))
+					.finally(() => !this.unloading && this.scheduleRefresh());
 			},
 			Math.min(minutes * 60, MAX_TIMEOUT_S) * 1000,
 		);
@@ -580,7 +730,9 @@ class UltimateUpdater extends utils.Adapter {
 			: this.clamp(this.config.pollIdle, 30, 5);
 		this.pollTimer = this.setTimeout(() => {
 			this.pollTimer = null;
-			this.pollJobs().finally(() => this.schedulePoll());
+			this.pollJobs()
+				.catch(e => this.log.warn(`Job status check failed: ${e.message}`))
+				.finally(() => this.schedulePoll());
 		}, seconds * 1000);
 	}
 
@@ -590,7 +742,9 @@ class UltimateUpdater extends utils.Adapter {
 			this.clearTimeout(this.pollTimer);
 			this.pollTimer = null;
 		}
-		this.pollJobs().finally(() => this.schedulePoll());
+		this.pollJobs()
+			.catch(e => this.log.warn(`Job status check failed: ${e.message}`))
+			.finally(() => this.schedulePoll());
 	}
 
 	/** Light-weight job check; a full status refresh follows when a job has finished. */
@@ -885,7 +1039,23 @@ class UltimateUpdater extends utils.Adapter {
 	 * @returns {Promise<void>}
 	 */
 	wait(ms) {
-		return new Promise(resolve => this.setTimeout(() => resolve(), ms));
+		return new Promise(resolve => {
+			if (this.unloading) {
+				resolve();
+				return;
+			}
+			let timer = undefined;
+			const done = () => {
+				this.waiters.delete(done);
+				if (timer) {
+					this.clearTimeout(timer);
+					timer = undefined;
+				}
+				resolve();
+			};
+			this.waiters.add(done);
+			timer = this.setTimeout(done, ms) || undefined;
+		});
 	}
 
 	/**
@@ -997,7 +1167,11 @@ class UltimateUpdater extends utils.Adapter {
 			}
 			this.log.info(`${label} finished: ${resultText()}`);
 		} catch (e) {
-			this.log.error(`${label} aborted: ${e.message}`);
+			if (this.unloading) {
+				this.log.info(`${label} aborted: adapter is stopping`);
+			} else {
+				this.log.error(`${label} aborted: ${e.message}`);
+			}
 		} finally {
 			this.bulk = null;
 			if (!this.unloading) {
@@ -1035,7 +1209,9 @@ class UltimateUpdater extends utils.Adapter {
 		}
 		if (rel === "updateAllVmsCts" || rel === "updateSecurityOnly") {
 			// runs in the background (can take long); progress in bulk.*
-			this.runBulkUpdate(rel === "updateSecurityOnly");
+			this.runBulkUpdate(rel === "updateSecurityOnly").catch(e =>
+				this.log.error(`Collective update failed: ${e.message}`),
+			);
 			return;
 		}
 		if (rel === "bulk.stop") {
@@ -1131,6 +1307,10 @@ class UltimateUpdater extends utils.Adapter {
 			}
 			if (this.pollTimer) {
 				this.clearTimeout(this.pollTimer);
+			}
+			// end pending waits (a running collective update stops)
+			for (const done of [...this.waiters]) {
+				done();
 			}
 			if (this.unsubscribeCredential) {
 				this.unsubscribeCredential().catch(() => {});
