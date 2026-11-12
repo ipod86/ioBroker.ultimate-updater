@@ -1,279 +1,292 @@
 {
-	"common": {
-		"name": "ultimate-updater",
-		"version": "0.1.1",
-		"news": {
-			"0.1.1": {
-				"en": "release published by the GitHub workflow (trusted publishing); news only for versions on npm; normalized repository URL",
-				"de": "Release über den GitHub-Workflow veröffentlicht (Trusted Publishing); News nur für Versionen auf npm; vereinheitlichte Repository-URL",
-				"ru": "выпуск опубликован через GitHub workflow (trusted publishing); новости только для версий на npm; нормализованный URL репозитория",
-				"pt": "versão publicada pelo workflow do GitHub (trusted publishing); notícias apenas para versões no npm; URL do repositório normalizado",
-				"nl": "release gepubliceerd via de GitHub-workflow (trusted publishing); nieuws alleen voor versies op npm; genormaliseerde repository-URL",
-				"fr": "version publiée par le workflow GitHub (trusted publishing) ; nouveautés uniquement pour les versions sur npm ; URL du dépôt normalisée",
-				"it": "release pubblicata dal workflow GitHub (trusted publishing); novità solo per le versioni su npm; URL del repository normalizzato",
-				"es": "versión publicada por el workflow de GitHub (trusted publishing); novedades solo para versiones en npm; URL del repositorio normalizada",
-				"pl": "wydanie opublikowane przez workflow GitHub (trusted publishing); nowości tylko dla wersji na npm; znormalizowany adres URL repozytorium",
-				"uk": "випуск опубліковано через GitHub workflow (trusted publishing); новини лише для версій на npm; нормалізована URL-адреса репозиторію",
-				"zh-cn": "通过 GitHub 工作流发布（可信发布）；新闻仅保留 npm 上已有的版本；规范化仓库 URL"
-			},
-			"0.1.0": {
-				"en": "Breaking: only the API token (integration API v1, Ultimate Updater 5.2+) is supported, the Web UI login with a Proxmox user was removed\nnotifications name the target with ID and name (\"115 · iobroker\")\nwarning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields",
-				"de": "Breaking: nur noch Anmeldung per API-Token (Integrations-API v1, Ultimate Updater 5.2+), der Web-UI-Login mit Proxmox-Benutzer wurde entfernt\nBenachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“)\nWarnung, wenn HTTPS abgeschaltet ist; laufende Anfragen werden beim Stoppen abgebrochen; feste Rollen für Zeitfelder",
-				"ru": "Важно: поддерживается только API-токен (интеграционный API v1, Ultimate Updater 5.2+), вход через Web UI с пользователем Proxmox удалён\nуведомления называют цель по ID и имени («115 · iobroker»)\nпредупреждение при выключенном HTTPS; при остановке текущие запросы прерываются; постоянные роли для полей времени",
-				"pt": "Importante: só é suportado o token de API (API de integração v1, Ultimate Updater 5.2+), o login pela Web UI com utilizador Proxmox foi removido\nas notificações indicam o alvo com ID e nome (\"115 · iobroker\")\naviso quando o HTTPS está desligado; pedidos em curso são cancelados ao parar; papéis fixos para campos de tempo",
-				"nl": "Let op: alleen het API-token (integratie-API v1, Ultimate Updater 5.2+) wordt ondersteund, het inloggen via de Web UI met een Proxmox-gebruiker is verwijderd\nmeldingen noemen het doel met ID en naam (\"115 · iobroker\")\nwaarschuwing als HTTPS uit staat; lopende verzoeken worden bij stoppen afgebroken; vaste rollen voor tijdvelden",
-				"fr": "Important : seul le jeton d'API (API d'intégration v1, Ultimate Updater 5.2+) est pris en charge, la connexion par l'interface web avec un utilisateur Proxmox a été supprimée\nles notifications nomment la cible avec ID et nom (« 115 · iobroker »)\navertissement si HTTPS est désactivé ; les requêtes en cours sont annulées à l'arrêt ; rôles fixes pour les champs de temps",
-				"it": "Importante: è supportato solo il token API (API di integrazione v1, Ultimate Updater 5.2+), l'accesso tramite Web UI con utente Proxmox è stato rimosso\nle notifiche indicano il target con ID e nome (\"115 · iobroker\")\navviso quando HTTPS è disattivato; le richieste in corso vengono interrotte all'arresto; ruoli fissi per i campi orari",
-				"es": "Importante: solo se admite el token de API (API de integración v1, Ultimate Updater 5.2+), se eliminó el inicio de sesión por la Web UI con usuario de Proxmox\nlas notificaciones nombran el destino con ID y nombre (\"115 · iobroker\")\naviso cuando HTTPS está desactivado; las solicitudes en curso se cancelan al detenerse; roles fijos para los campos de tiempo",
-				"pl": "Uwaga: obsługiwany jest tylko token API (integracyjne API v1, Ultimate Updater 5.2+), logowanie przez Web UI użytkownikiem Proxmox usunięto\npowiadomienia podają cel z ID i nazwą („115 · iobroker”)\nostrzeżenie przy wyłączonym HTTPS; trwające zapytania są przerywane przy zatrzymaniu; stałe role dla pól czasu",
-				"uk": "Важливо: підтримується лише API-токен (інтеграційний API v1, Ultimate Updater 5.2+), вхід через Web UI з користувачем Proxmox вилучено\nсповіщення називають ціль за ID та назвою («115 · iobroker»)\nпопередження, якщо HTTPS вимкнено; поточні запити перериваються під час зупинки; сталі ролі для полів часу",
-				"zh-cn": "重大变更：仅支持 API 令牌（集成 API v1，Ultimate Updater 5.2+），已移除使用 Proxmox 用户的 Web UI 登录\n通知中以 ID 和名称标识目标（“115 · iobroker”）\nHTTPS 关闭时发出警告；停止时中止正在进行的请求；时间字段使用固定角色"
-			}
-		},
-		"titleLang": {
-			"en": "Ultimate Updater",
-			"de": "Ultimate Updater",
-			"ru": "Ultimate Updater",
-			"pt": "Ultimate Updater",
-			"nl": "Ultimate Updater",
-			"fr": "Ultimate Updater",
-			"it": "Ultimate Updater",
-			"es": "Ultimate Updater",
-			"pl": "Ultimate Updater",
-			"uk": "Ultimate Updater",
-			"zh-cn": "Ultimate Updater"
-		},
-		"desc": {
-			"en": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
-			"de": "Zeigt den Update-Status von Proxmox-Hosts, LXC-Containern und VMs aus dem Ultimate Updater von BassT23 an und löst Prüfungen/Updates aus",
-			"ru": "Показывает статус обновления хостов Proxmox, контейнеров LXC и виртуальных машин из Ultimate Updater BassT23 и запускает проверки/обновления.",
-			"pt": "Mostra o status de atualização de hosts Proxmox, contêineres LXC e VMs do Ultimate Updater do BassT23 e aciona verificações/atualizações",
-			"nl": "Toont de updatestatus van Proxmox-hosts, LXC-containers en VM's van BassT23's Ultimate Updater en activeert controles/updates",
-			"fr": "Affiche l'état de mise à jour des hôtes Proxmox, des conteneurs LXC et des machines virtuelles à partir de Ultimate Updater de BassT23 et déclenche des vérifications/mises à jour.",
-			"it": "Mostra lo stato di aggiornamento degli host Proxmox, dei contenitori LXC e delle VM da Ultimate Updater di BassT23 e attiva controlli/aggiornamenti",
-			"es": "Muestra el estado de actualización de los hosts Proxmox, contenedores LXC y máquinas virtuales de Ultimate Updater de BassT23 y activa comprobaciones/actualizaciones",
-			"pl": "Pokazuje status aktualizacji hostów Proxmox, kontenerów LXC i maszyn wirtualnych z Ultimate Updater BassT23 i wyzwala kontrole/aktualizacje",
-			"uk": "Показує статус оновлення хостів Proxmox, контейнерів LXC і віртуальних машин із BassT23 Ultimate Updater і запускає перевірки/оновлення",
-			"zh-cn": "显示来自 BassT23 终极更新程序的 Proxmox 主机、LXC 容器和虚拟机的更新状态并触发检查/更新"
-		},
-		"authors": [
-			"ipod86 <david@graef.email>"
-		],
-		"keywords": [
-			"proxmox",
-			"updater",
-			"ultimate updater",
-			"lxc",
-			"vm",
-			"apt"
-		],
-		"licenseInformation": {
-			"type": "free",
-			"license": "MIT"
-		},
-		"platform": "Javascript/Node.js",
-		"icon": "ultimate-updater.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/admin/ultimate-updater.png",
-		"readme": "https://github.com/ipod86/ioBroker.ultimate-updater/blob/main/README.md",
-		"loglevel": "info",
-		"tier": 3,
-		"mode": "daemon",
-		"type": "utility",
-		"compact": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"adminUI": {
-			"config": "json"
-		},
-		"dependencies": [
-			{
-				"js-controller": ">=6.0.11"
-			}
-		],
-		"globalDependencies": [
-			{
-				"admin": ">=7.8.23"
-			}
-		],
-		"messagebox": true
-	},
-	"native": {
-		"ip": "",
-		"port": 8765,
-		"https": true,
-		"credentialMode": "manual",
-		"credentialId": "",
-		"apiToken": "",
-		"validateCertificate": false,
-		"refreshInterval": 60,
-		"pollIdle": 30,
-		"pollBusy": 2,
-		"deleteStaleTargets": true,
-		"excludeTargets": [],
-		"bulkTargets": "running",
-		"allowReboot": false,
-		"notifySecurity": true,
-		"notifyReboot": true,
-		"notifyJobFailed": true
-	},
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	],
-	"encryptedNative": [
-		"apiToken"
-	],
-	"protectedNative": [
-		"apiToken"
-	],
-	"notifications": [
-		{
-			"scope": "ultimate-updater",
-			"name": {
-				"en": "Ultimate Updater",
-				"de": "Ultimate Updater",
-				"ru": "Ultimate Updater",
-				"pt": "Ultimate Updater",
-				"nl": "Ultimate Updater",
-				"fr": "Ultimate Updater",
-				"it": "Ultimate Updater",
-				"es": "Ultimate Updater",
-				"pl": "Ultimate Updater",
-				"uk": "Ultimate Updater",
-				"zh-cn": "Ultimate Updater"
-			},
-			"description": {
-				"en": "Update notifications from ioBroker.ultimate-updater",
-				"de": "Update-Benachrichtigungen von ioBroker.ultimate-updater",
-				"ru": "Уведомления об обновлениях от ioBroker.ultimate-updater",
-				"pt": "Notificações de atualização do ioBroker.ultimate-updater",
-				"nl": "Updatemeldingen van ioBroker.ultimate-updater",
-				"fr": "Notifications de mise à jour de ioBroker.ultimate-updater",
-				"it": "Notifiche di aggiornamento da ioBroker.ultimate-updater",
-				"es": "Notificaciones de actualización de ioBroker.ultimate-updater",
-				"pl": "Powiadomienia o aktualizacjach z ioBroker.ultimate-updater",
-				"uk": "Сповіщення про оновлення від ioBroker.ultimate-updater",
-				"zh-cn": "来自 ioBroker.ultimate-updater 的更新通知"
-			},
-			"categories": [
-				{
-					"category": "securityUpdates",
-					"name": {
-						"en": "New security updates",
-						"de": "Neue Sicherheitsupdates",
-						"ru": "Новые обновления безопасности",
-						"pt": "Novas atualizações de segurança",
-						"nl": "Nieuwe beveiligingsupdates",
-						"fr": "Nouvelles mises à jour de sécurité",
-						"it": "Nuovi aggiornamenti di sicurezza",
-						"es": "Nuevas actualizaciones de seguridad",
-						"pl": "Nowe aktualizacje bezpieczeństwa",
-						"uk": "Нові оновлення безпеки",
-						"zh-cn": "新的安全更新"
-					},
-					"severity": "notify",
-					"description": {
-						"en": "A host, VM or container has new security updates",
-						"de": "Ein Host, eine VM oder ein Container hat neue Sicherheitsupdates",
-						"ru": "У хоста, ВМ или контейнера появились новые обновления безопасности",
-						"pt": "Um host, VM ou contêiner tem novas atualizações de segurança",
-						"nl": "Een host, VM of container heeft nieuwe beveiligingsupdates",
-						"fr": "Un hôte, une VM ou un conteneur a de nouvelles mises à jour de sécurité",
-						"it": "Un host, una VM o un container ha nuovi aggiornamenti di sicurezza",
-						"es": "Un host, VM o contenedor tiene nuevas actualizaciones de seguridad",
-						"pl": "Host, maszyna wirtualna lub kontener ma nowe aktualizacje bezpieczeństwa",
-						"uk": "Хост, ВМ або контейнер має нові оновлення безпеки",
-						"zh-cn": "主机、虚拟机或容器有新的安全更新"
-					},
-					"regex": [],
-					"limit": 10
-				},
-				{
-					"category": "rebootRequired",
-					"name": {
-						"en": "Reboot required",
-						"de": "Neustart erforderlich",
-						"ru": "Требуется перезагрузка",
-						"pt": "Reinício necessário",
-						"nl": "Herstart vereist",
-						"fr": "Redémarrage nécessaire",
-						"it": "Riavvio necessario",
-						"es": "Reinicio necesario",
-						"pl": "Wymagany restart",
-						"uk": "Потрібне перезавантаження",
-						"zh-cn": "需要重启"
-					},
-					"severity": "notify",
-					"description": {
-						"en": "A host, VM or container needs a reboot after updates",
-						"de": "Ein Host, eine VM oder ein Container muss nach Updates neu gestartet werden",
-						"ru": "Хосту, ВМ или контейнеру нужна перезагрузка после обновлений",
-						"pt": "Um host, VM ou contêiner precisa ser reiniciado após atualizações",
-						"nl": "Een host, VM of container moet na updates opnieuw worden opgestart",
-						"fr": "Un hôte, une VM ou un conteneur doit être redémarré après des mises à jour",
-						"it": "Un host, una VM o un container deve essere riavviato dopo gli aggiornamenti",
-						"es": "Un host, VM o contenedor necesita reiniciarse tras las actualizaciones",
-						"pl": "Host, maszyna wirtualna lub kontener wymaga restartu po aktualizacjach",
-						"uk": "Хост, ВМ або контейнер потребує перезавантаження після оновлень",
-						"zh-cn": "主机、虚拟机或容器在更新后需要重启"
-					},
-					"regex": [],
-					"limit": 10
-				},
-				{
-					"category": "jobFailed",
-					"name": {
-						"en": "Job failed",
-						"de": "Job fehlgeschlagen",
-						"ru": "Задание не выполнено",
-						"pt": "Tarefa falhou",
-						"nl": "Taak mislukt",
-						"fr": "Tâche échouée",
-						"it": "Job non riuscito",
-						"es": "Tarea fallida",
-						"pl": "Zadanie nie powiodło się",
-						"uk": "Завдання не виконано",
-						"zh-cn": "任务失败"
-					},
-					"severity": "alert",
-					"description": {
-						"en": "A check, update or reboot job of Ultimate Updater failed or was interrupted",
-						"de": "Ein Prüf-, Update- oder Neustart-Job des Ultimate Updater ist fehlgeschlagen oder wurde abgebrochen",
-						"ru": "Задание проверки, обновления или перезагрузки Ultimate Updater не выполнено или прервано",
-						"pt": "Uma tarefa de verificação, atualização ou reinício do Ultimate Updater falhou ou foi interrompida",
-						"nl": "Een controle-, update- of herstarttaak van Ultimate Updater is mislukt of onderbroken",
-						"fr": "Une tâche de vérification, de mise à jour ou de redémarrage d'Ultimate Updater a échoué ou a été interrompue",
-						"it": "Un job di controllo, aggiornamento o riavvio di Ultimate Updater non è riuscito o è stato interrotto",
-						"es": "Una tarea de comprobación, actualización o reinicio de Ultimate Updater falló o se interrumpió",
-						"pl": "Zadanie sprawdzenia, aktualizacji lub restartu Ultimate Updater nie powiodło się lub zostało przerwane",
-						"uk": "Завдання перевірки, оновлення або перезавантаження Ultimate Updater не виконано або перервано",
-						"zh-cn": "Ultimate Updater 的检查、更新或重启任务失败或被中断"
-					},
-					"regex": [],
-					"limit": 10
-				}
-			]
-		}
-	]
+  "common": {
+    "name": "ultimate-updater",
+    "version": "0.1.2",
+    "news": {
+      "0.1.2": {
+        "en": "fix: object fields of the API (e.g. `error`, `skip_reason`) are always channels; null clears their states; broken objects are repaired on start\nfix: log messages of notifications are always English\nfix: unhandled promise rejections in background tasks; waits end right away on stop\nfix: no default IP address, a missing address is reported\nchore: only the buttons are subscribed; title \"Ultimate Updater\" in all languages; README notes the permission for name and icon",
+        "de": "Fix: API-Objektfelder (z. B. `error`, `skip_reason`) sind immer Kanäle; Null löscht ihren Status; kaputte Objekte werden am Start repariert\nFix: Logmeldungen sind immer auf Englisch\nFix: Unbehandelte Absagen in Hintergrundaufgaben; Wartezeiten enden sofort\nFix: keine Standard-IP-Adresse, fehlt\nPflicht: Nur die Buttons sind abonniert; Titel „Ultimate Updater“ in allen Sprachen; README vermerkt Name und Symbol",
+        "ru": "исправлено: объектные поля API (например, `error`, `skip_reason`) всегда являются каналами; значение null очищает их состояния; поврежденные объекты восстанавливаются при запуске\nисправлено: сообщения журнала уведомлений всегда написаны на английском языке\nисправлено: необработанные отклонения обещаний в фоновых задачах; ожидание заканчивается сразу после остановки\nисправлено: нет IP-адреса по умолчанию, сообщается об отсутствующем адресе\nрутинная работа: подписаны только кнопки; название «Ultimate Updater» на всех языках; в README указано разрешение на использование имени и значка",
+        "pt": "fix: campos de objetos da API (ex: `error`, `skip_reason`) são sempre canais; null limpa seus estados; objetos quebrados são reparados no início\ncorreção: as notificações são sempre em inglês\ncorreção: promessas rejeitadas em tarefas em segundo plano; esperas acabam\ncorreção: sem endereço IP padrão, falta de endereço\ntarefa: só os botões estão inscritos; título “Ultimate Updater” em todos os idiomas; README dá permissão para nome e ícone",
+        "nl": "Oplossing: objectvelden van de API (bijv. `error`, `skip_reason`) zijn altijd kanalen; null verwijdert hun status; kapotte objecten worden gerepareerd bij het starten\noplossing: logboekberichten van meldingen zijn altijd in het Engels\noplossing: onverwerkte afwijzingen van beloften bij achtergrondtaken; wachttijden stoppen meteen\nopgelost: geen standaard IP-adres, er is een ontbrekend adres gemeld\nkarwei: alleen op de knoppen is geabonneerd; titel „Ultimate Updater” in alle talen; README neemt nota van de toestemming voor naam en pictogram",
+        "fr": "fix : les champs objets de l'API (par exemple « error », « skip_reason ») sont toujours des canaux ; null efface leur état ; les objets cassés sont réparés au démarrage\ncorrectif : les notifications sont toujours en anglais\ncorrectif : refus de promesses non gérés en arrière-plan ; les attentes s'arrêtent\nfix : pas d'adresse IP par défaut, il manque une adresse\ncorvée : seuls les boutons sont abonnés ; titre « Ultimate Updater » dans toutes les langues ; le nom et l'icône sont autorisés dans README",
+        "it": "fix: i campi oggetto dell'API (ad es. error, skip_reason) sono sempre canali; null cancella lo stato; gli oggetti rotti sono riparati all'avvio\nfix: i log delle notifiche sono sempre in inglese\nfix: promesse non gestite in background; le attese finiscono subito\nfix: nessun indirizzo IP predefinito, manca\nlavoro: solo i pulsanti sono abbonati; titolo «Ultimate Updater» in tutte le lingue; README nota il permesso per nome e icona",
+        "es": "corrección: los campos objeto de la API (por ejemplo, `error`, `skip_reason») son siempre canales; nulo borra sus estados; los objetos rotos se reparan al inicio\nsolución: los mensajes de registro son siempre en inglés\nsolución: rechazo descontrolado de promesas en segundo plano; la espera termina de inmediato\nsolución: sin dirección IP por defecto, se informa de que falta\ntarea: solo se suscriben los botones; título «Ultimate Updater» en todos los idiomas; README anota el permiso del nombre y el icono",
+        "pl": "fix: pola obiektowe interfejsu API (np. `error`, `skip_reason „) są zawsze kanałami; null usuwa ich stany; uszkodzone obiekty są naprawiane na początku\npoprawka: wiadomości dziennika powiadomień są zawsze angielskie\npoprawka: nieobsługiwane odrzucanie obietnic w zadaniach w tle; oczekiwania kończą się natychmiast po zatrzymaniu\npoprawka: brak domyślnego adresu IP, brakujący adres jest zgłaszany\nobowiązek: subskrybowane są tylko przyciski; tytuł „Ultimate Updater” we wszystkich językach; README odnotowuje uprawnienia do nazwy i ikony",
+        "uk": "виправлення: поля об'єктів API (наприклад, `error`, `skip_reason `) завжди є каналами; null очищає їх стани; несправні об'єкти відновлюються при запуску\nВиправлено: повідомлення журналу повідомлень завжди англійською\nвиправлення: необроблені відхилення обіцянок у фонових завданнях; очікування закінчується відразу після зупинки\nвиправлено: немає IP-адреси за замовчуванням, повідомляється про відсутню адресу\nробота: підписані лише кнопки; заголовок «Ultimate Updater» усіма мовами; README зазначає дозвіл на ім'я та піктограму",
+        "zh-cn": "修复：API 的对象字段（例如 `error`、`skip_reason`）始终是通道；空值清除其状态；损坏的对象在启动时会被修复\n修复：通知的日志消息始终是英文的\n修复：后台任务中未处理的承诺拒绝；等待在停止时立即结束\n修复：没有默认 IP 地址，报告了缺少地址\n琐事：只订阅按钮；所有语言的标题均为 “Ultimate Updater”；README 注明了名称和图标的权限"
+      },
+      "0.1.1": {
+        "en": "release published by the GitHub workflow (trusted publishing); news only for versions on npm; normalized repository URL",
+        "de": "Release über den GitHub-Workflow veröffentlicht (Trusted Publishing); News nur für Versionen auf npm; vereinheitlichte Repository-URL",
+        "ru": "выпуск опубликован через GitHub workflow (trusted publishing); новости только для версий на npm; нормализованный URL репозитория",
+        "pt": "versão publicada pelo workflow do GitHub (trusted publishing); notícias apenas para versões no npm; URL do repositório normalizado",
+        "nl": "release gepubliceerd via de GitHub-workflow (trusted publishing); nieuws alleen voor versies op npm; genormaliseerde repository-URL",
+        "fr": "version publiée par le workflow GitHub (trusted publishing) ; nouveautés uniquement pour les versions sur npm ; URL du dépôt normalisée",
+        "it": "release pubblicata dal workflow GitHub (trusted publishing); novità solo per le versioni su npm; URL del repository normalizzato",
+        "es": "versión publicada por el workflow de GitHub (trusted publishing); novedades solo para versiones en npm; URL del repositorio normalizada",
+        "pl": "wydanie opublikowane przez workflow GitHub (trusted publishing); nowości tylko dla wersji na npm; znormalizowany adres URL repozytorium",
+        "uk": "випуск опубліковано через GitHub workflow (trusted publishing); новини лише для версій на npm; нормалізована URL-адреса репозиторію",
+        "zh-cn": "通过 GitHub 工作流发布（可信发布）；新闻仅保留 npm 上已有的版本；规范化仓库 URL"
+      },
+      "0.1.0": {
+        "en": "Breaking: only the API token (integration API v1, Ultimate Updater 5.2+) is supported, the Web UI login with a Proxmox user was removed\nnotifications name the target with ID and name (\"115 · iobroker\")\nwarning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields",
+        "de": "Breaking: nur noch Anmeldung per API-Token (Integrations-API v1, Ultimate Updater 5.2+), der Web-UI-Login mit Proxmox-Benutzer wurde entfernt\nBenachrichtigungen nennen das Ziel mit ID und Name („115 · iobroker“)\nWarnung, wenn HTTPS abgeschaltet ist; laufende Anfragen werden beim Stoppen abgebrochen; feste Rollen für Zeitfelder",
+        "ru": "Важно: поддерживается только API-токен (интеграционный API v1, Ultimate Updater 5.2+), вход через Web UI с пользователем Proxmox удалён\nуведомления называют цель по ID и имени («115 · iobroker»)\nпредупреждение при выключенном HTTPS; при остановке текущие запросы прерываются; постоянные роли для полей времени",
+        "pt": "Importante: só é suportado o token de API (API de integração v1, Ultimate Updater 5.2+), o login pela Web UI com utilizador Proxmox foi removido\nas notificações indicam o alvo com ID e nome (\"115 · iobroker\")\naviso quando o HTTPS está desligado; pedidos em curso são cancelados ao parar; papéis fixos para campos de tempo",
+        "nl": "Let op: alleen het API-token (integratie-API v1, Ultimate Updater 5.2+) wordt ondersteund, het inloggen via de Web UI met een Proxmox-gebruiker is verwijderd\nmeldingen noemen het doel met ID en naam (\"115 · iobroker\")\nwaarschuwing als HTTPS uit staat; lopende verzoeken worden bij stoppen afgebroken; vaste rollen voor tijdvelden",
+        "fr": "Important : seul le jeton d'API (API d'intégration v1, Ultimate Updater 5.2+) est pris en charge, la connexion par l'interface web avec un utilisateur Proxmox a été supprimée\nles notifications nomment la cible avec ID et nom (« 115 · iobroker »)\navertissement si HTTPS est désactivé ; les requêtes en cours sont annulées à l'arrêt ; rôles fixes pour les champs de temps",
+        "it": "Importante: è supportato solo il token API (API di integrazione v1, Ultimate Updater 5.2+), l'accesso tramite Web UI con utente Proxmox è stato rimosso\nle notifiche indicano il target con ID e nome (\"115 · iobroker\")\navviso quando HTTPS è disattivato; le richieste in corso vengono interrotte all'arresto; ruoli fissi per i campi orari",
+        "es": "Importante: solo se admite el token de API (API de integración v1, Ultimate Updater 5.2+), se eliminó el inicio de sesión por la Web UI con usuario de Proxmox\nlas notificaciones nombran el destino con ID y nombre (\"115 · iobroker\")\naviso cuando HTTPS está desactivado; las solicitudes en curso se cancelan al detenerse; roles fijos para los campos de tiempo",
+        "pl": "Uwaga: obsługiwany jest tylko token API (integracyjne API v1, Ultimate Updater 5.2+), logowanie przez Web UI użytkownikiem Proxmox usunięto\npowiadomienia podają cel z ID i nazwą („115 · iobroker”)\nostrzeżenie przy wyłączonym HTTPS; trwające zapytania są przerywane przy zatrzymaniu; stałe role dla pól czasu",
+        "uk": "Важливо: підтримується лише API-токен (інтеграційний API v1, Ultimate Updater 5.2+), вхід через Web UI з користувачем Proxmox вилучено\nсповіщення називають ціль за ID та назвою («115 · iobroker»)\nпопередження, якщо HTTPS вимкнено; поточні запити перериваються під час зупинки; сталі ролі для полів часу",
+        "zh-cn": "重大变更：仅支持 API 令牌（集成 API v1，Ultimate Updater 5.2+），已移除使用 Proxmox 用户的 Web UI 登录\n通知中以 ID 和名称标识目标（“115 · iobroker”）\nHTTPS 关闭时发出警告；停止时中止正在进行的请求；时间字段使用固定角色"
+      }
+    },
+    "titleLang": {
+      "en": "Ultimate Updater",
+      "de": "Ultimate Updater",
+      "ru": "Ultimate Updater",
+      "pt": "Ultimate Updater",
+      "nl": "Ultimate Updater",
+      "fr": "Ultimate Updater",
+      "it": "Ultimate Updater",
+      "es": "Ultimate Updater",
+      "pl": "Ultimate Updater",
+      "uk": "Ultimate Updater",
+      "zh-cn": "Ultimate Updater"
+    },
+    "desc": {
+      "en": "Shows update status of Proxmox hosts, LXC containers and VMs from BassT23's Ultimate Updater and triggers checks/updates",
+      "de": "Zeigt den Update-Status von Proxmox-Hosts, LXC-Containern und VMs aus dem Ultimate Updater von BassT23 an und löst Prüfungen/Updates aus",
+      "ru": "Показывает статус обновления хостов Proxmox, контейнеров LXC и виртуальных машин из Ultimate Updater BassT23 и запускает проверки/обновления.",
+      "pt": "Mostra o status de atualização de hosts Proxmox, contêineres LXC e VMs do Ultimate Updater do BassT23 e aciona verificações/atualizações",
+      "nl": "Toont de updatestatus van Proxmox-hosts, LXC-containers en VM's van BassT23's Ultimate Updater en activeert controles/updates",
+      "fr": "Affiche l'état de mise à jour des hôtes Proxmox, des conteneurs LXC et des machines virtuelles à partir de Ultimate Updater de BassT23 et déclenche des vérifications/mises à jour.",
+      "it": "Mostra lo stato di aggiornamento degli host Proxmox, dei contenitori LXC e delle VM da Ultimate Updater di BassT23 e attiva controlli/aggiornamenti",
+      "es": "Muestra el estado de actualización de los hosts Proxmox, contenedores LXC y máquinas virtuales de Ultimate Updater de BassT23 y activa comprobaciones/actualizaciones",
+      "pl": "Pokazuje status aktualizacji hostów Proxmox, kontenerów LXC i maszyn wirtualnych z Ultimate Updater BassT23 i wyzwala kontrole/aktualizacje",
+      "uk": "Показує статус оновлення хостів Proxmox, контейнерів LXC і віртуальних машин із BassT23 Ultimate Updater і запускає перевірки/оновлення",
+      "zh-cn": "显示来自 BassT23 终极更新程序的 Proxmox 主机、LXC 容器和虚拟机的更新状态并触发检查/更新"
+    },
+    "authors": [
+      "ipod86 <david@graef.email>"
+    ],
+    "keywords": [
+      "proxmox",
+      "updater",
+      "ultimate updater",
+      "lxc",
+      "vm",
+      "apt"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "ultimate-updater.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/admin/ultimate-updater.png",
+    "readme": "https://github.com/ipod86/ioBroker.ultimate-updater/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "utility",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.8.23"
+      }
+    ],
+    "messagebox": true
+  },
+  "native": {
+    "ip": "",
+    "port": 8765,
+    "https": true,
+    "credentialMode": "manual",
+    "credentialId": "",
+    "apiToken": "",
+    "validateCertificate": false,
+    "refreshInterval": 60,
+    "pollIdle": 30,
+    "pollBusy": 2,
+    "deleteStaleTargets": true,
+    "excludeTargets": [],
+    "bulkTargets": "running",
+    "allowReboot": false,
+    "notifySecurity": true,
+    "notifyReboot": true,
+    "notifyJobFailed": true
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ],
+  "encryptedNative": [
+    "apiToken"
+  ],
+  "protectedNative": [
+    "apiToken"
+  ],
+  "notifications": [
+    {
+      "scope": "ultimate-updater",
+      "name": {
+        "en": "Ultimate Updater",
+        "de": "Ultimate Updater",
+        "ru": "Ultimate Updater",
+        "pt": "Ultimate Updater",
+        "nl": "Ultimate Updater",
+        "fr": "Ultimate Updater",
+        "it": "Ultimate Updater",
+        "es": "Ultimate Updater",
+        "pl": "Ultimate Updater",
+        "uk": "Ultimate Updater",
+        "zh-cn": "Ultimate Updater"
+      },
+      "description": {
+        "en": "Update notifications from ioBroker.ultimate-updater",
+        "de": "Update-Benachrichtigungen von ioBroker.ultimate-updater",
+        "ru": "Уведомления об обновлениях от ioBroker.ultimate-updater",
+        "pt": "Notificações de atualização do ioBroker.ultimate-updater",
+        "nl": "Updatemeldingen van ioBroker.ultimate-updater",
+        "fr": "Notifications de mise à jour de ioBroker.ultimate-updater",
+        "it": "Notifiche di aggiornamento da ioBroker.ultimate-updater",
+        "es": "Notificaciones de actualización de ioBroker.ultimate-updater",
+        "pl": "Powiadomienia o aktualizacjach z ioBroker.ultimate-updater",
+        "uk": "Сповіщення про оновлення від ioBroker.ultimate-updater",
+        "zh-cn": "来自 ioBroker.ultimate-updater 的更新通知"
+      },
+      "categories": [
+        {
+          "category": "securityUpdates",
+          "name": {
+            "en": "New security updates",
+            "de": "Neue Sicherheitsupdates",
+            "ru": "Новые обновления безопасности",
+            "pt": "Novas atualizações de segurança",
+            "nl": "Nieuwe beveiligingsupdates",
+            "fr": "Nouvelles mises à jour de sécurité",
+            "it": "Nuovi aggiornamenti di sicurezza",
+            "es": "Nuevas actualizaciones de seguridad",
+            "pl": "Nowe aktualizacje bezpieczeństwa",
+            "uk": "Нові оновлення безпеки",
+            "zh-cn": "新的安全更新"
+          },
+          "severity": "notify",
+          "description": {
+            "en": "A host, VM or container has new security updates",
+            "de": "Ein Host, eine VM oder ein Container hat neue Sicherheitsupdates",
+            "ru": "У хоста, ВМ или контейнера появились новые обновления безопасности",
+            "pt": "Um host, VM ou contêiner tem novas atualizações de segurança",
+            "nl": "Een host, VM of container heeft nieuwe beveiligingsupdates",
+            "fr": "Un hôte, une VM ou un conteneur a de nouvelles mises à jour de sécurité",
+            "it": "Un host, una VM o un container ha nuovi aggiornamenti di sicurezza",
+            "es": "Un host, VM o contenedor tiene nuevas actualizaciones de seguridad",
+            "pl": "Host, maszyna wirtualna lub kontener ma nowe aktualizacje bezpieczeństwa",
+            "uk": "Хост, ВМ або контейнер має нові оновлення безпеки",
+            "zh-cn": "主机、虚拟机或容器有新的安全更新"
+          },
+          "regex": [],
+          "limit": 10
+        },
+        {
+          "category": "rebootRequired",
+          "name": {
+            "en": "Reboot required",
+            "de": "Neustart erforderlich",
+            "ru": "Требуется перезагрузка",
+            "pt": "Reinício necessário",
+            "nl": "Herstart vereist",
+            "fr": "Redémarrage nécessaire",
+            "it": "Riavvio necessario",
+            "es": "Reinicio necesario",
+            "pl": "Wymagany restart",
+            "uk": "Потрібне перезавантаження",
+            "zh-cn": "需要重启"
+          },
+          "severity": "notify",
+          "description": {
+            "en": "A host, VM or container needs a reboot after updates",
+            "de": "Ein Host, eine VM oder ein Container muss nach Updates neu gestartet werden",
+            "ru": "Хосту, ВМ или контейнеру нужна перезагрузка после обновлений",
+            "pt": "Um host, VM ou contêiner precisa ser reiniciado após atualizações",
+            "nl": "Een host, VM of container moet na updates opnieuw worden opgestart",
+            "fr": "Un hôte, une VM ou un conteneur doit être redémarré après des mises à jour",
+            "it": "Un host, una VM o un container deve essere riavviato dopo gli aggiornamenti",
+            "es": "Un host, VM o contenedor necesita reiniciarse tras las actualizaciones",
+            "pl": "Host, maszyna wirtualna lub kontener wymaga restartu po aktualizacjach",
+            "uk": "Хост, ВМ або контейнер потребує перезавантаження після оновлень",
+            "zh-cn": "主机、虚拟机或容器在更新后需要重启"
+          },
+          "regex": [],
+          "limit": 10
+        },
+        {
+          "category": "jobFailed",
+          "name": {
+            "en": "Job failed",
+            "de": "Job fehlgeschlagen",
+            "ru": "Задание не выполнено",
+            "pt": "Tarefa falhou",
+            "nl": "Taak mislukt",
+            "fr": "Tâche échouée",
+            "it": "Job non riuscito",
+            "es": "Tarea fallida",
+            "pl": "Zadanie nie powiodło się",
+            "uk": "Завдання не виконано",
+            "zh-cn": "任务失败"
+          },
+          "severity": "alert",
+          "description": {
+            "en": "A check, update or reboot job of Ultimate Updater failed or was interrupted",
+            "de": "Ein Prüf-, Update- oder Neustart-Job des Ultimate Updater ist fehlgeschlagen oder wurde abgebrochen",
+            "ru": "Задание проверки, обновления или перезагрузки Ultimate Updater не выполнено или прервано",
+            "pt": "Uma tarefa de verificação, atualização ou reinício do Ultimate Updater falhou ou foi interrompida",
+            "nl": "Een controle-, update- of herstarttaak van Ultimate Updater is mislukt of onderbroken",
+            "fr": "Une tâche de vérification, de mise à jour ou de redémarrage d'Ultimate Updater a échoué ou a été interrompue",
+            "it": "Un job di controllo, aggiornamento o riavvio di Ultimate Updater non è riuscito o è stato interrotto",
+            "es": "Una tarea de comprobación, actualización o reinicio de Ultimate Updater falló o se interrumpió",
+            "pl": "Zadanie sprawdzenia, aktualizacji lub restartu Ultimate Updater nie powiodło się lub zostało przerwane",
+            "uk": "Завдання перевірки, оновлення або перезавантаження Ultimate Updater не виконано або перервано",
+            "zh-cn": "Ultimate Updater 的检查、更新或重启任务失败或被中断"
+          },
+          "regex": [],
+          "limit": 10
+        }
+      ]
+    }
+  ]
 }
