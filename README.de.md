@@ -106,6 +106,8 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (ipod86) fix: eine Benachrichtigung pro Kategorie und Statusabfrage mit allen Zielen statt einer pro Ziel – der Benachrichtigungs-Manager hat sonst bei jeder einzelnen Meldung die offenen erneut verschickt (doppelte Telegram-Nachrichten)
 
 ### 0.1.2 (2026-11-12)
 * (ipod86) fix: Objektfelder der API (z. B. `error`, `skip_reason`) sind immer Channels; null leert deren Datenpunkte; fehlerhafte Objekte werden beim Start repariert
