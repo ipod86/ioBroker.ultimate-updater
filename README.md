@@ -123,7 +123,7 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.2.1 (2026-11-14)
 * (ipod86) fix: web component loads much faster and in one step (all targets and jobs in the new state `widget.data`); confirmation box no longer white in some themes
 
 ### 0.2.0 (2026-11-14)
@@ -141,11 +141,6 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 
 ### 0.1.1 (2026-10-25)
 * (ipod86) release published by the GitHub workflow (trusted publishing); news only for versions on npm; normalized repository URL
-
-### 0.1.0 (2026-10-25)
-* (ipod86) **Breaking:** only the API token (integration API v1, Ultimate Updater 5.2+) is supported; the Web UI login with a Proxmox user was removed
-* (ipod86) warning when HTTPS is switched off; running requests are aborted on stop; stable roles for time fields; `info.connection` only written on changes; README and translations of the news corrected
-* (ipod86) notifications name the target with ID and name ("115 · iobroker"), so targets with the same name can be told apart
 
 Older changelogs are available in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

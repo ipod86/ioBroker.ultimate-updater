@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "ultimate-updater",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "news": {
+      "0.2.1": {
+        "en": "fix: web component loads much faster and in one step (all targets and jobs in the new state `widget.data`); confirmation box no longer white in some themes",
+        "de": "Fix: Webkomponente lädt viel schneller und in einem Schritt (alle Ziele und Jobs im Status `widget.data`); bei manchen Themes ist das Bestätigungsfeld nicht mehr weiß",
+        "ru": "исправлено: веб-компонент загружается намного быстрее и за один шаг (все цели и задания в новом состоянии `widget.data`); в некоторых темах окно подтверждения перестало быть белым",
+        "pt": "correção: o componente web carrega muito mais rápido (todos os alvos e tarefas no novo estado `widget.data`); alguns temas não confirmam mais",
+        "nl": "oplossing: de webcomponent laadt veel sneller en in één stap (alle doelen en taken in de nieuwe staat `widget.data`); het bevestigingsvakje is in sommige thema's niet meer wit",
+        "fr": "fix : le composant Web se charge plus vite et en une seule étape (toutes les cibles et jobs sont dans le nouvel état widget.data) ; la case de confirmation n'est plus blanche",
+        "it": "fix: il componente web si carica molto più velocemente e in un solo passaggio (widget.data); la casella di conferma non è più bianca in alcuni temi",
+        "es": "solución: el componente web se carga mucho más rápido y en un solo paso (todos los objetivos y trabajos en el nuevo estado «widget.data»); la casilla de confirmación ya no es blanca en algunos temas",
+        "pl": "poprawka: komponent web ładuje się znacznie szybciej i w jednym kroku (wszystkie cele i zadania w nowym stanie „widget.data”); pole potwierdzenia nie jest już białe w niektórych motywach",
+        "uk": "виправлено: веб-компонент завантажується набагато швидше і в один крок (всі цілі та завдання в новому стані `widget.data`); вікно підтвердження більше не є білим у деяких темах",
+        "zh-cn": "修复：网页组件加载速度快得多，只需一步即可完成（所有目标和任务都处于新状态 “widget.data”）；某些主题中的确认框不再是白色的"
+      },
       "0.2.0": {
         "en": "feat: web component \"Ultimate Updater table\" for AURA and vis-2, optionally with CPU/RAM/disk from the proxmox adapter",
         "de": "Feat: Webkomponente „Ultimate Updater Table“ für AURA und VIS-2, optional mit CPU/RAM/Disk vom Proxmox Adapter",
