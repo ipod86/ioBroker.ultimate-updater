@@ -61,6 +61,7 @@ The Web UI login with a Proxmox account is deliberately not supported: it needs 
 | `summary.*` | Pending security/normal updates in total, targets with updates, unreachable targets, targets that need a reboot |
 | `targets.<name>_<id>.*` | All fields Ultimate Updater delivers per host/LXC/VM (e.g. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
 | `targets.<…>.jobState`, `targets.<…>.jobUnit` | State and id of the latest job of this target (`none` if there is none) |
+| `widget.data` | All targets and jobs in one JSON state – read by the web component |
 | `jobs.<unit>.*` | Running and recent jobs; for failed jobs the last log lines are stored in `log` |
 
 ### Buttons
@@ -122,6 +123,9 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (ipod86) fix: web component loads much faster and in one step (all targets and jobs in the new state `widget.data`); confirmation box no longer white in some themes
+
 ### 0.2.0 (2026-11-14)
 * (ipod86) feat: web component "Ultimate Updater table" for AURA and vis-2, optionally with CPU/RAM/disk from the proxmox adapter
 

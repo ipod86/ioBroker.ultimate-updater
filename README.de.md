@@ -122,6 +122,9 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (ipod86) fix: Web-Komponente lädt deutlich schneller und in einem Schritt (alle Ziele und Jobs im neuen Datenpunkt `widget.data`); Rückfrage-Box in manchen Themes nicht mehr weiß
+
 ### 0.2.0 (2026-11-14)
 * (ipod86) feat: Web-Komponente „Ultimate-Updater-Tabelle“ für AURA und vis-2, optional mit CPU/RAM/Festplatte aus dem proxmox-Adapter
 
