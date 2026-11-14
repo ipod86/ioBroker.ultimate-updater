@@ -719,6 +719,19 @@ class UltimateUpdater extends utils.Adapter {
 		});
 		await this.button("bulk.stop", "Stop the collective update after the current target");
 		await this.setStateChangedAsync("bulk.active", false, true);
+		await this.channel("widget", "Data for the web component");
+		await this.extendObject("widget.data", {
+			type: "state",
+			common: {
+				name: "All targets and jobs in one state (for the web component)",
+				type: "string",
+				role: "json",
+				read: true,
+				write: false,
+				def: "",
+			},
+			native: {},
+		});
 	}
 
 	// ── refresh / poll ───────────────────────────────────────────────────────
@@ -830,6 +843,7 @@ class UltimateUpdater extends utils.Adapter {
 			}
 		}
 		await this.writeTargetJobs(jobs);
+		await this.writeWidgetData(jobs);
 		await this.notifyJobs(jobs);
 
 		// remove jobs that are no longer in the server's history
@@ -866,6 +880,61 @@ class UltimateUpdater extends utils.Adapter {
 			);
 			await this.value(`targets.${key}.jobUnit`, "Latest job of this target", last ? String(last.unit) : "none");
 		}
+	}
+
+	/**
+	 * Everything the web component shows in one JSON state, so it needs a handful of subscriptions instead of
+	 * hundreds. Written only when something changed.
+	 *
+	 * @param {import("./lib/types").ApiData[]} jobs - jobs from /api/jobs
+	 */
+	async writeWidgetData(jobs) {
+		const ts = j => Date.parse(j.started_at || j.finished_at || "") || 0;
+		const targets = [];
+		for (const [key, t] of this.targets) {
+			const own = jobs
+				.filter(
+					j =>
+						j &&
+						(j.target === t.id ||
+							(t.type === "host" && (j.target === `host:${t.node}` || j.target === t.node))),
+				)
+				.sort((a, b) => ts(b) - ts(a));
+			const last = own[0];
+			const sec = t.security_updates;
+			const normal = t.normal_updates;
+			targets.push({
+				key,
+				id: String(t.id),
+				name: String(t.name || t.id),
+				type: String(t.type || ""),
+				reachable: t.reachable === true,
+				stopped: this.isStopped(t),
+				sec: Number(sec) || 0,
+				normal: Number(normal) || 0,
+				known: (sec !== undefined && sec !== null) || (normal !== undefined && normal !== null),
+				reboot: t.reboot_required === true,
+				hasReboot:
+					!!this.config.allowReboot && t.reboot_required === true && ["host", "lxc", "vm"].includes(t.type),
+				job: last ? String(last.state) : "none",
+				jobUnit: last ? String(last.unit) : "",
+			});
+		}
+		const data = {
+			targets,
+			jobs: jobs
+				.filter(j => j && j.unit)
+				.map(j => ({
+					unit: String(j.unit),
+					key: this.sanitize(j.unit),
+					state: String(j.state || ""),
+					target: String(j.target || ""),
+					type: String(j.type || ""),
+					started: Date.parse(j.started_at || "") || 0,
+					finished: Date.parse(j.finished_at || "") || 0,
+				})),
+		};
+		await this.setStateChangedAsync("widget.data", JSON.stringify(data), true);
 	}
 
 	/** Full refresh: status of all targets, summary, jobs, updater version. */

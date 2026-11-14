@@ -98,22 +98,6 @@ const ICON = {
 	reboot: "M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z",
 };
 
-// the states of a target the table reads
-const TARGET_FIELDS = [
-	"id",
-	"name",
-	"type",
-	"status",
-	"reachable",
-	"security_updates",
-	"normal_updates",
-	"reboot_required",
-	"jobState",
-	"jobUnit",
-	"check_status",
-	"skip_reason.code",
-];
-const JOB_FIELDS = ["unit", "state", "target", "type", "started_at", "finished_at"];
 const GLOBAL = ["jobRunning", "info.connection", "summary.text", "bulk.active", "bulk.progress"];
 const RUNNING = ["running", "pending", "starting"];
 const DENSITY = { compact: 3, normal: 6, comfortable: 9 };
@@ -179,7 +163,6 @@ class UltimateUpdaterTable extends IobWebComponent {
 		this.shadowRoot.innerHTML = '<style></style><div class="uu-card"></div>';
 		this._ids = []; // states found below the instances (targets, jobs, proxmox)
 		this._found = ""; // instance pair the IDs were found for
-		this._hasState = new Set(); // all state IDs below the targets (buttons that exist)
 		this._open = new Set(); // rows whose log is open
 		this._logs = {}; // unit -> log text (loaded on demand)
 		this._pending = new Map(); // button state -> time it was pressed
@@ -226,21 +209,22 @@ class UltimateUpdaterTable extends IobWebComponent {
 
 	/**
 	 * @param {Record<string, unknown>} _settings settings
-	 * @returns {string[]} all states the table shows
+	 * @returns {string[]} all states the table shows: a few of the adapter (all targets and jobs are in
+	 *   widget.data) and the load of the proxmox guests
 	 */
 	getStateIds(_settings) {
 		const uu = this.uu;
 		if (!uu) {
 			return [];
 		}
-		if (this._found !== `${uu}|${this.pve}`) {
+		if (this._found !== `${uu}|${this.pve}|${(this.settings || {}).showDisk ? 1 : 0}`) {
 			void this._discover(false);
 		}
-		return [...GLOBAL.map(g => `${uu}.${g}`), ...this._ids];
+		return [...GLOBAL.map(g => `${uu}.${g}`), `${uu}.widget.data`, ...this._ids];
 	}
 
 	/**
-	 * Finds the targets, jobs and proxmox guests of the instances and subscribes their states
+	 * Finds the proxmox guests (vmid -> path) once and subscribes only their load values
 	 *
 	 * @param {boolean} again true for the regular repeat: only resubscribe when something changed
 	 */
@@ -251,50 +235,46 @@ class UltimateUpdaterTable extends IobWebComponent {
 			return;
 		}
 		const pve = this.pve;
-		const key = `${uu}|${pve}`;
+		const disk = !!(this.settings || {}).showDisk;
+		const key = `${uu}|${pve}|${disk ? 1 : 0}`;
 		this._discovering = true;
 		try {
 			const ids = [];
-			const targetStates = await socket.getObjectViewSystem("state", `${uu}.targets.`, `${uu}.targets.香`);
-			const has = new Set(Object.keys(targetStates));
-			const targets = new Set();
-			for (const id of has) {
-				const rest = id.slice(uu.length + 9).split(".");
-				targets.add(rest[0]);
-			}
-			for (const t of targets) {
-				for (const f of TARGET_FIELDS) {
-					const id = `${uu}.targets.${t}.${f}`;
-					has.has(id) && ids.push(id);
-				}
-			}
-			const jobStates = await socket.getObjectViewSystem("state", `${uu}.jobs.`, `${uu}.jobs.香`);
-			for (const id of Object.keys(jobStates)) {
-				if (JOB_FIELDS.some(f => id.endsWith(`.${f}`)) && id.split(".").length === 5) {
-					ids.push(id);
-				}
-			}
+			const map = new Map();
 			if (pve) {
-				const pveStates = await socket.getObjectViewSystem("state", `${pve}.`, `${pve}.香`);
-				for (const id of Object.keys(pveStates)) {
-					const rest = id.slice(pve.length + 1);
-					if (
-						/^(lxc|qemu)\.[^.]+\.(vmid|cpu|mem_lev|disk_lev|status)$/.test(rest) ||
-						/^node_[^.]+\.(cpu|memory\.used_lev)$/.test(rest)
-					) {
-						ids.push(id);
+				const pveStates = Object.keys(await socket.getObjectViewSystem("state", `${pve}.`, `${pve}.香`));
+				const vmids = pveStates.filter(id => /^(lxc|qemu)\.[^.]+\.vmid$/.test(id.slice(pve.length + 1)));
+				// the vmid is read once, not subscribed: it does not change
+				const values = await Promise.all(vmids.map(id => socket.getState(id).catch(() => null)));
+				vmids.forEach((id, i) => {
+					const v = values[i];
+					if (v && v.val !== null && v.val !== undefined) {
+						const path = id.slice(0, -5);
+						map.set(String(v.val), path);
+						ids.push(`${path}.cpu`, `${path}.mem_lev`);
+						disk && ids.push(`${path}.disk_lev`);
+					}
+				});
+				for (const id of pveStates) {
+					const m = /^node_([^.]+)\.cpu$/.exec(id.slice(pve.length + 1));
+					if (m) {
+						const path = id.slice(0, -4);
+						map.set(`host:${m[1]}`, path);
+						ids.push(`${path}.cpu`, `${path}.memory.used_lev`);
 					}
 				}
 			}
 			const changed = !again || this._found !== key || ids.join() !== this._ids.join();
-			this._hasState = has;
+			this._pveMap = map;
 			this._ids = ids;
 			this._found = key;
+			this._discovered = true;
 			if (changed) {
 				// the base class subscribes what getStateIds names when the settings are set again
 				this.settings = { ...this.settings };
 			}
 		} catch (e) {
+			this._discovered = true;
 			this._error = String(e && e.message ? e.message : e);
 			this.render();
 		} finally {
@@ -311,104 +291,72 @@ class UltimateUpdaterTable extends IobWebComponent {
 		return s ? s.val : null;
 	}
 
+	/** @returns {{targets: object[], jobs: object[]}} all targets and jobs from the state widget.data */
+	_data() {
+		const raw = this.val(`${this.uu}.widget.data`);
+		if (raw === this._rawData && this._parsed) {
+			return this._parsed;
+		}
+		this._rawData = raw;
+		try {
+			const d = typeof raw === "string" && raw ? JSON.parse(raw) : null;
+			this._parsed = {
+				targets: Array.isArray(d?.targets) ? d.targets : [],
+				jobs: Array.isArray(d?.jobs) ? d.jobs : [],
+			};
+		} catch {
+			this._parsed = { targets: [], jobs: [] };
+		}
+		return this._parsed;
+	}
+
 	/** @returns {boolean} a job is running (the head line shows its time) */
 	_isRunning() {
 		const uu = this.uu;
 		return !!uu && (this.val(`${uu}.jobRunning`) === true || this._jobs().running.length > 0);
 	}
 
-	/** @returns {{running: object[], lastAllMs: number, all: object[]}} jobs from the job states */
+	/** @returns {{running: object[], lastAllMs: number, all: object[]}} jobs from widget.data */
 	_jobs() {
-		const uu = this.uu;
 		const running = [];
 		const all = [];
 		let lastAllMs = 0;
 		let lastAllStart = 0;
-		for (const id of this._ids) {
-			if (!id.startsWith(`${uu}.jobs.`) || !id.endsWith(".unit")) {
-				continue;
-			}
-			const p = id.slice(0, -5);
-			const state = this.val(`${p}.state`);
-			const target = String(this.val(`${p}.target`) || "");
-			const type = this.val(`${p}.type`);
-			const started = Date.parse(this.val(`${p}.started_at`) || "") || 0;
-			all.push({ unit: this.val(id), state, target, type, started });
-			if (RUNNING.includes(state)) {
-				running.push({ target, type, started });
-			} else if (target === "all-systems" && type === "check" && /^completed/.test(String(state))) {
-				const finished = Date.parse(this.val(`${p}.finished_at`) || "") || 0;
-				if (finished > started && started > lastAllStart) {
-					lastAllStart = started;
-					lastAllMs = finished - started;
+		for (const j of this._data().jobs) {
+			all.push(j);
+			if (RUNNING.includes(j.state)) {
+				running.push(j);
+			} else if (j.target === "all-systems" && j.type === "check" && /^completed/.test(String(j.state))) {
+				if (j.finished > j.started && j.started > lastAllStart) {
+					lastAllStart = j.started;
+					lastAllMs = j.finished - j.started;
 				}
 			}
 		}
 		return { running, lastAllMs, all };
 	}
 
-	/** @returns {Map<string, string>} vmid ("123", "host:pve") -> path in the proxmox adapter */
-	_pvePaths() {
-		const pve = this.pve;
-		const map = new Map();
-		if (!pve) {
-			return map;
-		}
-		for (const id of this._ids) {
-			if (!id.startsWith(`${pve}.`)) {
-				continue;
-			}
-			if (id.endsWith(".vmid")) {
-				map.set(String(this.val(id)), id.slice(0, -5));
-			} else if (/\.node_[^.]+\.cpu$/.test(id)) {
-				const p = id.slice(0, -4);
-				map.set(`host:${p.split(".")[2].replace(/^node_/, "")}`, p);
-			}
-		}
-		return map;
-	}
-
 	/** @returns {object[]} the systems, sorted and filtered as the settings say */
 	_devices() {
 		const s = this.settings || {};
 		const uu = this.uu;
-		const pve = this._pvePaths();
+		const pve = this._pveMap || new Map();
 		const devices = [];
-		for (const id of this._ids) {
-			if (!id.startsWith(`${uu}.targets.`) || !id.endsWith(".id") || id.split(".").length !== 5) {
-				continue;
-			}
-			const p = id.slice(0, -3);
-			const v = f => this.val(`${p}.${f}`);
-			const type = v("type");
-			const vmid = String(this.val(id) || "");
+		for (const t of this._data().targets) {
 			const dev = {
-				path: p,
-				name: v("name") || vmid,
-				vmid,
-				type,
-				reachable: v("reachable") === true,
-				stopped:
-					v("status") === "stopped" ||
-					v("check_status") === "stopped" ||
-					/STOPPED/.test(String(v("skip_reason.code") || "")),
-				sec: Number(v("security_updates")) || 0,
-				normal: Number(v("normal_updates")) || 0,
-				known: v("security_updates") !== null || v("normal_updates") !== null,
-				reboot: v("reboot_required") === true,
-				job: v("jobState"),
-				jobUnit: v("jobUnit"),
-				hasReboot: this._hasState.has(`${p}.reboot`),
+				...t,
+				path: `${uu}.targets.${t.key}`,
+				vmid: t.id,
 			};
-			const pp = pve.get(vmid);
+			const pp = pve.get(t.id);
 			if (pp) {
 				dev.cpu = this.val(`${pp}.cpu`);
-				dev.ram = this.val(type === "host" ? `${pp}.memory.used_lev` : `${pp}.mem_lev`);
+				dev.ram = this.val(t.type === "host" ? `${pp}.memory.used_lev` : `${pp}.mem_lev`);
 				// VMs without guest agent report 0 for the disk
 				const disk = this.val(`${pp}.disk_lev`);
-				dev.disk = type === "host" || (type === "vm" && !Number(disk)) ? null : disk;
+				dev.disk = t.type === "host" || (t.type === "vm" && !Number(disk)) ? null : disk;
 			}
-			if (s.hosts === false && type === "host") {
+			if (s.hosts === false && t.type === "host") {
 				continue;
 			}
 			if (s.stopped === false && dev.stopped) {
@@ -501,7 +449,8 @@ class UltimateUpdaterTable extends IobWebComponent {
 		}
 		this._loading = unit;
 		try {
-			const st = await this.socket.getState(`${this.uu}.jobs.${jobKey(unit)}.log`);
+			const job = this._data().jobs.find(j => j.unit === unit);
+			const st = await this.socket.getState(`${this.uu}.jobs.${job ? job.key : jobKey(unit)}.log`);
 			this._logs[unit] = st ? String(st.val || "") : "";
 		} catch {
 			this._logs[unit] = "";
@@ -635,7 +584,7 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 .uu-bar { width: 100%; height: 3px; margin: -2px 0 6px; background: color-mix(in srgb, currentColor 8%, transparent); border-radius: 2px; overflow: hidden; }
 .uu-bar span { display: block; height: 100%; background: ${cWarn}; transition: width 1s linear; }
 .uu-msg { padding: 12px; text-align: center; opacity: 0.7; }
-.uu-ask { margin: 4px 0 8px; padding: 10px; border-radius: 6px; background: var(--iob-paper, #2b374e); border: 1px solid color-mix(in srgb, currentColor 30%, transparent); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+.uu-ask { margin: 4px 0 8px; padding: 10px; border-radius: 6px; background: color-mix(in srgb, currentColor 8%, transparent); border: 1px solid color-mix(in srgb, currentColor 30%, transparent); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
 .uu-ask p { margin: 0 0 8px; font-size: 0.9em; }
 .uu-ask div { display: flex; justify-content: flex-end; gap: 6px; }
 .uu-ask .uu-btn { margin: 0; padding: 5px 12px; }
@@ -651,6 +600,20 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 			style.textContent = css;
 		}
 		const root = this.shadowRoot.querySelector(".uu-card");
+		// draw only when the data is complete - otherwise the table builds up in jumps
+		if (!this._ready && !this.editMode) {
+			if (!this._isComplete()) {
+				if (!this._readyTimer) {
+					this._readyTimer = setTimeout(() => {
+						this._ready = true;
+						this.render();
+					}, 2500);
+				}
+				return;
+			}
+			this._ready = true;
+			clearTimeout(this._readyTimer);
+		}
 		const html = this._html();
 		if (root.innerHTML !== html) {
 			// keep the scroll position of open logs
@@ -664,6 +627,16 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 				ask.scrollIntoView({ block: "nearest", behavior: "smooth" });
 			}
 		}
+	}
+
+	/** @returns {boolean} all subscribed states have arrived and the proxmox guests are known */
+	_isComplete() {
+		const uu = this.uu;
+		if (!uu || !this.socket) {
+			return false;
+		}
+		const ids = [...GLOBAL.map(g => `${uu}.${g}`), `${uu}.widget.data`, ...this._ids];
+		return (!this.pve || this._discovered) && ids.every(id => this.states[id] !== undefined);
 	}
 
 	/** @returns {string} the HTML of the table */
