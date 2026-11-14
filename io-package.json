@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "ultimate-updater",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "feat: web component \"Ultimate Updater table\" for AURA and vis-2, optionally with CPU/RAM/disk from the proxmox adapter",
+        "de": "Feat: Webkomponente „Ultimate Updater Table“ für AURA und VIS-2, optional mit CPU/RAM/Disk vom Proxmox Adapter",
+        "ru": "feat: веб-компонент «Ultimate Updater table» для AURA и vis-2, опционально с процессором/оперативной память/диском от адаптера proxmox",
+        "pt": "feat: componente web “Ultimate Updater table” para AURA e vis-2, opcional com CPU/RAM/disco do adaptador proxmox",
+        "nl": "feat: webcomponent „Ultimate Updater table” voor AURA en vis-2, optioneel met CPU/RAM/schijf via de proxmox-adapter",
+        "fr": "exploit : composant Web « Ultimate Updater Table » pour AURA et Vis-2, en option avec CPU/RAM/disque via l'adaptateur Proxmox",
+        "it": "feat: componente web «Ultimate Updater table» per AURA e vis-2, a scelta con CPU/RAM/disco dall'adattatore proxmox",
+        "es": "feat: componente web «Ultimate Updater table» para AURA y vis-2, opcional con CPU/RAM/disco del adaptador proxmox",
+        "pl": "feat: komponent internetowy „Tabela Ultimate Updater” dla AURA i vis-2, opcjonalnie z procesorem/RAM/dyskiem z adaptera proxmox",
+        "uk": "feat: веб-компонент «Таблиця Ultimate Updater» для AURA та vis-2, за бажанням з процесора/оперативною пам'яті/диском від адаптера proxmox",
+        "zh-cn": "壮举：适用于 AURA 和 vis-2 的 Web 组件 “Ultimate Updater 表”，可选配来自 proxmox 适配器的 CPU/RAM/磁盘"
+      },
       "0.1.3": {
         "en": "fix: one notification per category and status refresh with all targets, instead of one per target – the notification manager sent the open ones again for every single notification (repeated Telegram messages)",
         "de": "Fix: eine Meldung pro Kategorie und Statusaktualisierung mit allen Zielen, statt einer pro Ziel — der Meldungsmanager hat bei jeder Meldung die offenen erneut gesendet (wiederholte Telegram-Nachrichten)",
