@@ -80,6 +80,20 @@ Nothing is ever updated or rebooted automatically – only when you press a butt
 
 **Collective updates run one target after the other:** Ultimate Updater answers as soon as a job has *started* (HTTP 202), so the adapter waits until the job of one target has finished before it starts the next one. Jobs started elsewhere (e.g. in the Web UI) are waited for as well. Progress is shown in `bulk.active` and `bulk.progress` (e.g. `3/7: web`, at the end e.g. `4 ok, 2 unchanged, 1 failed, 0 not started`; "unchanged" = job state `skipped`, there was nothing to update).
 
+### Widget for AURA and vis-2
+
+The adapter brings the web component **"Ultimate Updater table"**: all hosts, VMs and containers in one table with the open updates (security / other), reboot hint, job state and the buttons – the same as the states above, ready for the dashboard. It needs no script and no simple-api: the buttons write the button states directly through the connection of the visualisation.
+
+- Summary line with progress of "check all" and collective updates, buttons *Check all*, *Update all VMs/CTs* and *Only with security updates*
+- Per system: status dot, type and ID, flags (reboot, running, failed), check/update/reboot buttons as icons or text
+- Failed jobs: the reason and the last log lines open below the row (the log is read only when opened)
+- Questions before updates and reboots appear right below the pressed row
+- Optional **CPU, RAM and disk load from the [proxmox adapter](https://github.com/iobroker-community-adapters/ioBroker.proxmox)** per system, orange/red from adjustable limits (disk: containers; VMs only with guest agent)
+- Settings: which buttons and systems are shown (hosts, switched off ones, only systems with updates), order, row height, text size, striped rows and the colours
+- New or deleted systems appear by themselves
+
+In AURA (0.106.0 or newer) the component is in the list of web components after the installation; set **"Clicks" of the widget to "component"**, otherwise the buttons get no clicks. vis-2 needs version 2.20.7 or newer.
+
 ### Notifications
 
 The adapter uses the ioBroker notification manager, so Telegram, e-mail, Pushover etc. are configured centrally in ioBroker. Notifications are sent only on changes and in the system language:
@@ -106,6 +120,9 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (ipod86) feat: web component "Ultimate Updater table" for AURA and vis-2, optionally with CPU/RAM/disk from the proxmox adapter
+
 ### 0.1.3 (2026-11-14)
 * (ipod86) fix: one notification per category and status refresh with all targets, instead of one per target – the notification manager sent the open ones again for every single notification (repeated Telegram messages)
 
