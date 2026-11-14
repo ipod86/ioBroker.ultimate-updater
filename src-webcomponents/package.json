@@ -1,0 +1,12 @@
+{
+	"name": "ultimate-updater-webcomponents",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "node build.mjs"
+	},
+	"devDependencies": {
+		"@iobroker/web-components": "^0.8.0",
+		"esbuild": "^0.25.0"
+	}
+}

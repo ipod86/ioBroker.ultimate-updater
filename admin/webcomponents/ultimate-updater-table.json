@@ -1,0 +1,273 @@
+{
+	"$schema": "https://raw.githubusercontent.com/ioBroker/web-components/main/schemas/manifest.json",
+	"manifestVersion": 1,
+	"tag": "iob-ultimate-updater-table",
+	"name": { "en": "Ultimate Updater table", "de": "Ultimate-Updater-Tabelle" },
+	"description": {
+		"en": "Proxmox hosts, VMs and containers with open updates, reboot hint, job state and buttons; optionally CPU, RAM and disk from the proxmox adapter",
+		"de": "Proxmox-Hosts, VMs und Container mit offenen Updates, Neustart-Hinweis, Job-Status und Knöpfen; optional CPU, RAM und Festplatte aus dem proxmox-Adapter"
+	},
+	"icon": "../ultimate-updater.png",
+	"module": "ultimate-updater-table.js",
+	"size": { "width": 380, "height": 900 },
+	"settings": {
+		"type": "tabs",
+		"items": {
+			"general": {
+				"type": "panel",
+				"label": { "en": "General", "de": "Allgemein" },
+				"items": {
+					"instance": {
+						"type": "instance",
+						"adapter": "ultimate-updater",
+						"label": { "en": "Instance", "de": "Instanz" },
+						"default": "ultimate-updater.0"
+					},
+					"summary": {
+						"type": "checkbox",
+						"label": { "en": "Summary line", "de": "Zusammenfassung oben" },
+						"default": true
+					},
+					"globalButtons": {
+						"type": "checkbox",
+						"label": {
+							"en": "Buttons check all / update all / security only",
+							"de": "Knöpfe Alle prüfen / Alle updaten / Nur Sicherheitsupdates"
+						},
+						"default": true
+					},
+					"checkButton": {
+						"type": "checkbox",
+						"label": { "en": "Check button per system", "de": "Prüfen-Knopf je System" },
+						"default": true
+					},
+					"updateButton": {
+						"type": "checkbox",
+						"label": { "en": "Update button per system", "de": "Update-Knopf je System" },
+						"default": true
+					},
+					"rebootButton": {
+						"type": "checkbox",
+						"label": {
+							"en": "Reboot button (when the adapter offers it)",
+							"de": "Neustart-Knopf (wenn der Adapter ihn anbietet)"
+						},
+						"default": true
+					},
+					"confirm": {
+						"type": "checkbox",
+						"label": { "en": "Ask before updates", "de": "Vor Updates nachfragen" },
+						"help": { "en": "Reboots are always confirmed", "de": "Neustarts werden immer abgefragt" },
+						"default": true
+					},
+					"hosts": {
+						"type": "checkbox",
+						"label": { "en": "Show Proxmox hosts", "de": "Proxmox-Hosts zeigen" },
+						"default": true
+					},
+					"stopped": {
+						"type": "checkbox",
+						"label": { "en": "Show switched off VMs/CTs", "de": "Ausgeschaltete VMs/CTs zeigen" },
+						"default": true
+					},
+					"onlyWithUpdates": {
+						"type": "checkbox",
+						"label": {
+							"en": "Only systems with updates or reboot hint",
+							"de": "Nur Systeme mit Updates oder Neustart-Hinweis"
+						},
+						"default": false
+					},
+					"errorLog": {
+						"type": "checkbox",
+						"label": {
+							"en": "Failed job: reason and log to open",
+							"de": "Fehlgeschlagener Job: Grund und Log zum Aufklappen"
+						},
+						"default": true
+					},
+					"globalJobLog": {
+						"type": "checkbox",
+						"label": {
+							"en": "Show failed collective jobs below the table",
+							"de": "Fehlgeschlagene Sammel-Jobs unter der Tabelle zeigen"
+						},
+						"default": true
+					},
+					"logLines": {
+						"type": "number",
+						"label": { "en": "Log lines", "de": "Logzeilen" },
+						"min": 5,
+						"max": 200,
+						"default": 20,
+						"hidden": "data.errorLog === false && data.globalJobLog === false"
+					},
+					"sort": {
+						"type": "select",
+						"label": { "en": "Order", "de": "Reihenfolge" },
+						"options": [
+							{
+								"value": "status",
+								"label": {
+									"en": "Running first, hosts on top, by name",
+									"de": "Eingeschaltete zuerst, Hosts oben, nach Name"
+								}
+							},
+							{
+								"value": "updates",
+								"label": { "en": "Most updates first", "de": "Meiste Updates zuerst" }
+							},
+							{ "value": "name", "label": { "en": "By name", "de": "Nach Name" } }
+						],
+						"default": "status"
+					}
+				}
+			},
+			"proxmox": {
+				"type": "panel",
+				"label": { "en": "Proxmox", "de": "Proxmox" },
+				"items": {
+					"pveInfo": {
+						"type": "staticText",
+						"text": {
+							"en": "Load per system from the proxmox adapter. Leave the instance empty to hide the columns.",
+							"de": "Auslastung je System aus dem proxmox-Adapter. Instanz leer lassen, um die Spalten auszublenden."
+						}
+					},
+					"pveInstance": {
+						"type": "instance",
+						"adapter": "proxmox",
+						"label": { "en": "proxmox instance", "de": "proxmox-Instanz" },
+						"default": ""
+					},
+					"showCpu": {
+						"type": "checkbox",
+						"label": { "en": "CPU", "de": "CPU" },
+						"default": true,
+						"disabled": "!data.pveInstance"
+					},
+					"showRam": {
+						"type": "checkbox",
+						"label": { "en": "RAM", "de": "RAM" },
+						"default": true,
+						"disabled": "!data.pveInstance"
+					},
+					"showDisk": {
+						"type": "checkbox",
+						"label": { "en": "Disk", "de": "Festplatte" },
+						"help": {
+							"en": "Containers; VMs only with guest agent, not for hosts",
+							"de": "Container; VMs nur mit Gast-Agent, nicht für Hosts"
+						},
+						"default": false,
+						"disabled": "!data.pveInstance"
+					},
+					"warnAt": {
+						"type": "number",
+						"label": { "en": "Orange from (%)", "de": "Orange ab (%)" },
+						"min": 1,
+						"max": 100,
+						"default": 60,
+						"disabled": "!data.pveInstance"
+					},
+					"critAt": {
+						"type": "number",
+						"label": { "en": "Red from (%)", "de": "Rot ab (%)" },
+						"min": 1,
+						"max": 100,
+						"default": 85,
+						"disabled": "!data.pveInstance"
+					}
+				}
+			},
+			"design": {
+				"type": "panel",
+				"label": { "en": "Design", "de": "Gestaltung" },
+				"items": {
+					"buttonStyle": {
+						"type": "select",
+						"label": { "en": "Buttons per system", "de": "Knöpfe je System" },
+						"options": [
+							{ "value": "icons", "label": { "en": "Icons", "de": "Symbole" } },
+							{ "value": "text", "label": { "en": "Text", "de": "Text" } }
+						],
+						"default": "icons"
+					},
+					"density": {
+						"type": "select",
+						"label": { "en": "Row height", "de": "Zeilenhöhe" },
+						"options": [
+							{ "value": "compact", "label": { "en": "Compact", "de": "Kompakt" } },
+							{ "value": "normal", "label": { "en": "Normal", "de": "Normal" } },
+							{ "value": "comfortable", "label": { "en": "Roomy", "de": "Großzügig" } }
+						],
+						"default": "normal"
+					},
+					"fontScale": {
+						"type": "slider",
+						"label": { "en": "Text size (%)", "de": "Textgröße (%)" },
+						"min": 70,
+						"max": 150,
+						"step": 5,
+						"default": 100
+					},
+					"showType": {
+						"type": "checkbox",
+						"label": { "en": "Show type (CT, VM, Host)", "de": "Typ zeigen (CT, VM, Host)" },
+						"default": true
+					},
+					"showVmid": {
+						"type": "checkbox",
+						"label": { "en": "Show VM/CT ID", "de": "VM/CT-ID zeigen" },
+						"default": true,
+						"disabled": "data.showType === false"
+					},
+					"zebra": {
+						"type": "checkbox",
+						"label": { "en": "Striped rows", "de": "Zeilen abwechselnd hinterlegen" },
+						"default": false
+					},
+					"colorsHeader": {
+						"type": "header",
+						"text": { "en": "Colours (empty = default)", "de": "Farben (leer = Standard)" }
+					},
+					"colorUpdate": {
+						"type": "color",
+						"label": { "en": "Update button", "de": "Update-Knopf" },
+						"default": "#1976D2"
+					},
+					"colorCheck": {
+						"type": "color",
+						"label": { "en": "Check button", "de": "Prüfen-Knopf" },
+						"default": "#455a64"
+					},
+					"colorSecurity": {
+						"type": "color",
+						"label": { "en": "Security button", "de": "Sicherheits-Knopf" },
+						"default": "#c62828"
+					},
+					"colorReboot": {
+						"type": "color",
+						"label": { "en": "Reboot button", "de": "Neustart-Knopf" },
+						"default": "#e65100"
+					},
+					"colorOk": {
+						"type": "color",
+						"label": { "en": "OK / reachable", "de": "OK / erreichbar" },
+						"default": "#4caf50"
+					},
+					"colorWarn": {
+						"type": "color",
+						"label": { "en": "Updates / warning", "de": "Updates / Warnung" },
+						"default": "#ff9800"
+					},
+					"colorCrit": {
+						"type": "color",
+						"label": { "en": "Security updates / error", "de": "Sicherheitsupdates / Fehler" },
+						"default": "#f44336"
+					}
+				}
+			}
+		}
+	}
+}

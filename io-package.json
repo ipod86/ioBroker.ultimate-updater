@@ -122,7 +122,10 @@
         "admin": ">=7.8.23"
       }
     ],
-    "messagebox": true
+    "messagebox": true,
+    "webComponents": [
+      "webcomponents/ultimate-updater-table.json"
+    ]
   },
   "native": {
     "ip": "",
