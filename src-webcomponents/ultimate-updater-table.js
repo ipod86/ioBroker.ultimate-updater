@@ -657,6 +657,12 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 			const scroll = [...root.querySelectorAll("pre")].map(p => p.scrollTop);
 			root.innerHTML = html;
 			root.querySelectorAll("pre").forEach((p, i) => (p.scrollTop = scroll[i] || 0));
+			// a question at the bottom must not hide below the edge of the widget
+			const ask = root.querySelector(".uu-ask");
+			if (ask && this._askShown !== this._ask) {
+				this._askShown = this._ask;
+				ask.scrollIntoView({ block: "nearest", behavior: "smooth" });
+			}
 		}
 	}
 
