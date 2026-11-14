@@ -84,6 +84,8 @@ Nothing is ever updated or rebooted automatically – only when you press a butt
 
 The adapter brings the web component **"Ultimate Updater table"**: all hosts, VMs and containers in one table with the open updates (security / other), reboot hint, job state and the buttons – the same as the states above, ready for the dashboard. It needs no script and no simple-api: the buttons write the button states directly through the connection of the visualisation.
 
+![Ultimate Updater table](https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/docs/widget_en.jpg)
+
 - Summary line with progress of "check all" and collective updates, buttons *Check all*, *Update all VMs/CTs* and *Only with security updates*
 - Per system: status dot, type and ID, flags (reboot, running, failed), check/update/reboot buttons as icons or text
 - Failed jobs: the reason and the last log lines open below the row (the log is read only when opened)

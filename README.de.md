@@ -84,6 +84,8 @@ Es wird nie automatisch aktualisiert oder neu gestartet – nur per Knopfdruck. 
 
 Der Adapter bringt die Web-Komponente **„Ultimate-Updater-Tabelle“** mit: alle Hosts, VMs und Container in einer Tabelle mit den offenen Updates (Sicherheit / weitere), Neustart-Hinweis, Job-Status und den Knöpfen – dieselben Datenpunkte wie oben, fertig fürs Dashboard. Sie braucht kein Skript und keine simple-api: Die Knöpfe schreiben die Button-Datenpunkte direkt über die Verbindung der Visualisierung.
 
+![Ultimate-Updater-Tabelle](https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/docs/widget_de.jpg)
+
 - Zusammenfassung mit Fortschritt von „Alle prüfen“ und Sammel-Updates, Knöpfe *Alle prüfen*, *Alle VMs/CTs updaten* und *Nur mit Sicherheitsupdates*
 - Je System: Status-Punkt, Typ und ID, Kennzeichen (Neustart, läuft, Fehler), Prüfen-/Update-/Neustart-Knöpfe als Symbole oder Text
 - Fehlgeschlagene Jobs: Grund und letzte Logzeilen klappen unter der Zeile auf (das Log wird erst beim Öffnen gelesen)
