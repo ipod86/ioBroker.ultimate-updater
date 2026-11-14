@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "ultimate-updater",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "news": {
+      "0.1.3": {
+        "en": "fix: one notification per category and status refresh with all targets, instead of one per target – the notification manager sent the open ones again for every single notification (repeated Telegram messages)",
+        "de": "Fix: eine Meldung pro Kategorie und Statusaktualisierung mit allen Zielen, statt einer pro Ziel — der Meldungsmanager hat bei jeder Meldung die offenen erneut gesendet (wiederholte Telegram-Nachrichten)",
+        "ru": "исправлено: одно уведомление на категорию и обновление статуса со всеми целями вместо одного на цель — менеджер уведомлений снова отправлял открытые уведомления для каждого отдельного уведомления (повторные сообщения Telegram)",
+        "pt": "correção: uma notificação por categoria e atualização de status com todos os alvos, em vez de uma por alvo — o gerenciador reenviava as abertas para cada notificação (mensagens repetidas do Telegram)",
+        "nl": "oplossing: één melding per categorie en statusvernieuwing met alle doelen, in plaats van één per doel — de meldingsbeheerder stuurde de openstaande meldingen opnieuw voor elke melding (herhaalde Telegram-berichten)",
+        "fr": "correctif : une notification par catégorie et actualisation du statut pour toutes les cibles, au lieu d'une par cible. Le gestionnaire des notifications renvoyait les notifications ouvertes pour chaque notification (messages Telegram répétés)",
+        "it": "fix: una notifica per categoria e aggiornamento dello stato con tutti i target, anziché una per target: il gestore delle notifiche ha inviato quelli aperti per ogni notifica (ripetuti messaggi Telegram)",
+        "es": "solución: una notificación por categoría y actualización de estado con todos los objetivos, en lugar de una por objetivo; el gestor de notificaciones volvió a enviar las abiertas para cada notificación (mensajes repetidos de Telegram)",
+        "pl": "poprawka: jedno powiadomienie na kategorię i odświeżenie statusu ze wszystkimi celami, zamiast jednego na cel - menedżer powiadomień wysłał otwarte ponownie dla każdego pojedynczego powiadomienia (powtarzające się wiadomości Telegrama)",
+        "uk": "виправлено: одне сповіщення на категорію та оновлення статусу з усіма цілями, замість одного на ціль - менеджер сповіщень знову надсилав відкриті для кожного окремого сповіщення (повторювані повідомлення Telegram)",
+        "zh-cn": "修复：每个类别一个通知，所有目标的状态刷新，而不是每个目标一个——通知管理器会为每一个通知（重复的电报消息）再次发送打开的通知"
+      },
       "0.1.2": {
         "en": "fix: object fields of the API (e.g. `error`, `skip_reason`) are always channels; null clears their states; broken objects are repaired on start\nfix: log messages of notifications are always English\nfix: unhandled promise rejections in background tasks; waits end right away on stop\nfix: no default IP address, a missing address is reported\nchore: only the buttons are subscribed; title \"Ultimate Updater\" in all languages; README notes the permission for name and icon",
         "de": "Fix: API-Objektfelder (z. B. `error`, `skip_reason`) sind immer Kanäle; Null löscht ihren Status; kaputte Objekte werden am Start repariert\nFix: Logmeldungen sind immer auf Englisch\nFix: Unbehandelte Absagen in Hintergrundaufgaben; Wartezeiten enden sofort\nFix: keine Standard-IP-Adresse, fehlt\nPflicht: Nur die Buttons sind abonniert; Titel „Ultimate Updater“ in allen Sprachen; README vermerkt Name und Symbol",
