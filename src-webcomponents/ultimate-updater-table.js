@@ -583,7 +583,7 @@ class UltimateUpdaterTable extends IobWebComponent {
 		const cCrit = color(s.colorCrit, "#f44336");
 		const cOk = color(s.colorOk, "#4caf50");
 		return `
-:host { display: block; width: 100%; height: 100%; overflow: auto; color: var(--iob-text, inherit); }
+:host { display: block; width: 100%; height: 100%; overflow: auto; color: inherit; }
 * { box-sizing: border-box; }
 .uu-card { width: 100%; font-family: var(--iob-font-family, sans-serif); font-size: ${(16 * scale).toFixed(1)}px; line-height: 1.2; position: relative; }
 .uu-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
