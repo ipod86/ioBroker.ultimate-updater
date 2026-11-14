@@ -546,7 +546,8 @@ class UltimateUpdaterTable extends IobWebComponent {
 		}
 		const confirm = el.dataset.confirm;
 		if (confirm && (this.settings || {}).confirm !== false) {
-			this._ask = { text: confirm, id: el.dataset.id };
+			const row = el.closest("tr.uu-row");
+			this._ask = { text: confirm, id: el.dataset.id, where: row ? row.dataset.path : "head" };
 			this.render();
 			return;
 		}
@@ -634,10 +635,11 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 .uu-bar { width: 100%; height: 3px; margin: -2px 0 6px; background: color-mix(in srgb, currentColor 8%, transparent); border-radius: 2px; overflow: hidden; }
 .uu-bar span { display: block; height: 100%; background: ${cWarn}; transition: width 1s linear; }
 .uu-msg { padding: 12px; text-align: center; opacity: 0.7; }
-.uu-ask { position: sticky; top: 0; z-index: 2; margin-bottom: 8px; padding: 10px; border-radius: 6px; background: var(--iob-paper, #2b374e); border: 1px solid color-mix(in srgb, currentColor 30%, transparent); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+.uu-ask { margin: 4px 0 8px; padding: 10px; border-radius: 6px; background: var(--iob-paper, #2b374e); border: 1px solid color-mix(in srgb, currentColor 30%, transparent); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
 .uu-ask p { margin: 0 0 8px; font-size: 0.9em; }
 .uu-ask div { display: flex; justify-content: flex-end; gap: 6px; }
 .uu-ask .uu-btn { margin: 0; padding: 5px 12px; }
+.uu-askrow td { padding-top: 0; }
 `;
 	}
 
@@ -696,11 +698,12 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 		const showHead = s.summary !== false || s.globalButtons !== false;
 		let html = "";
 
-		if (this._ask) {
-			html += `<div class="uu-ask"><p>${esc(this._ask.text)}</p><div><button class="uu-btn check" data-ask="cancel">${esc(
+		// the question appears where the button was pressed: below the head or below the row
+		const askBox = () =>
+			`<div class="uu-ask"><p>${esc(this._ask.text)}</p><div><button class="uu-btn check" data-ask="cancel">${esc(
 				t.cancel,
 			)}</button><button class="uu-btn" data-ask="ok">${esc(t.ok)}</button></div></div>`;
-		}
+		const askHere = where => !!this._ask && this._ask.where === where;
 		if (showHead) {
 			html += '<div class="uu-head">';
 			if (s.summary !== false) {
@@ -732,6 +735,9 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 			if (s.summary !== false && bar >= 0 && !bulkActive) {
 				html += `<div class="uu-bar"><span style="width:${bar}%"></span></div>`;
 			}
+		}
+		if (askHere("head")) {
+			html += askBox();
 		}
 
 		if (!devices.length) {
@@ -825,9 +831,12 @@ pre { margin: 4px 0 0; padding: 6px; max-height: 220px; overflow: auto; font-siz
 			const loadCells = cols
 				.map(c => `<td class="c">${dev.stopped ? '<span class="uu-na">–</span>' : this._load(dev[c[0]])}</td>`)
 				.join("");
-			html += `<tr class="uu-row${dev.stopped || !dev.reachable ? " uu-off" : ""}"><td><span class="uu-dot ${dot}"></span>${esc(
+			html += `<tr class="uu-row${dev.stopped || !dev.reachable ? " uu-off" : ""}" data-path="${esc(dev.path)}"><td><span class="uu-dot ${dot}"></span>${esc(
 				dev.name,
 			)}${s.showType !== false ? `<span class="uu-type">${esc(typeLabel)}${esc(idLabel)}</span>` : ""}${flags}</td>${loadCells}<td class="c">${upd}</td><td class="r">${actions}</td></tr>`;
+			if (askHere(dev.path)) {
+				html += `<tr class="uu-askrow"><td colspan="${span}">${askBox()}</td></tr>`;
+			}
 			if (canLog && this._open.has(dev.path)) {
 				html += `<tr class="uu-logrow"><td colspan="${span}"><div class="uu-logwrap">${this._errorContent(
 					dev.jobUnit,
