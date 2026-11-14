@@ -530,7 +530,7 @@ class UltimateUpdater extends utils.Adapter {
 	 */
 	async notify(category, text) {
 		// the log is always English, the notification uses the system language
-		this.log.info(`Notification (${category}): ${text(this.TEN)}`);
+		this.log.info(`Notification (${category}): ${text(this.TEN).replace(/\n/g, "; ")}`);
 		try {
 			await this.registerNotification("ultimate-updater", category, text(this.T));
 		} catch (e) {
@@ -544,6 +544,19 @@ class UltimateUpdater extends utils.Adapter {
 	}
 
 	/**
+	 * Sends one notification per category with all collected lines. Several notifications in a burst
+	 * make the notification manager send the open ones again for every single registration.
+	 *
+	 * @param {"securityUpdates" | "jobFailed" | "rebootRequired"} category - notification category
+	 * @param {((T: ReturnType<typeof texts>) => string)[]} lines - one text builder per target
+	 */
+	async notifyAll(category, lines) {
+		if (lines.length) {
+			await this.notify(category, T => lines.map(l => l(T)).join("\n"));
+		}
+	}
+
+	/**
 	 * Notifies new security updates and new reboot requirements (only on changes).
 	 *
 	 * @param {import("./lib/types").ApiData[]} targets - targets from /api/status
@@ -553,21 +566,25 @@ class UltimateUpdater extends utils.Adapter {
 		const prev = this.notified || { sec: {}, reboot: [], jobs: [] };
 		const sec = {};
 		const reboot = [];
+		const secLines = [];
+		const rebootLines = [];
 		for (const t of targets) {
 			const id = String(t.id);
 			const name = label(t);
 			const n = Number(t.security_updates) || 0;
 			sec[id] = n;
 			if (!first && this.config.notifySecurity !== false && n > (prev.sec[id] || 0)) {
-				await this.notify("securityUpdates", T => T.security(name, n));
+				secLines.push(T => T.security(name, n));
 			}
 			if (t.reboot_required === true) {
 				reboot.push(id);
 				if (!first && this.config.notifyReboot !== false && !prev.reboot.includes(id)) {
-					await this.notify("rebootRequired", T => T.reboot(name));
+					rebootLines.push(T => T.reboot(name));
 				}
 			}
 		}
+		await this.notifyAll("securityUpdates", secLines);
+		await this.notifyAll("rebootRequired", rebootLines);
 		this.notified = { sec, reboot, jobs: prev.jobs || [] };
 		await this.saveNotified();
 	}
@@ -584,15 +601,18 @@ class UltimateUpdater extends utils.Adapter {
 		const known = new Set(this.notified.jobs || []);
 		const failed = jobs.filter(j => j && j.unit && FAILURE_STATES.includes(j.state));
 		let changed = false;
+		const lines = [];
 		for (const j of failed) {
 			if (!known.has(j.unit)) {
 				// failures that already existed when the adapter started are not notified
 				if (this.config.notifyJobFailed !== false && this.notifiedJobsInitialised) {
-					await this.notify("jobFailed", T => T.jobFailed(this.targetName(j.target), j.state));
+					const name = this.targetName(j.target);
+					lines.push(T => T.jobFailed(name, j.state));
 				}
 				changed = true;
 			}
 		}
+		await this.notifyAll("jobFailed", lines);
 		const units = failed.map(j => j.unit);
 		if (changed || units.length !== known.size) {
 			this.notified.jobs = units;

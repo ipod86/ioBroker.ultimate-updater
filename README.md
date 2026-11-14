@@ -106,6 +106,9 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (ipod86) fix: one notification per category and status refresh with all targets, instead of one per target – the notification manager sent the open ones again for every single notification (repeated Telegram messages)
+
 ### 0.1.2 (2026-11-12)
 * (ipod86) fix: object fields of the API (e.g. `error`, `skip_reason`) are always channels; null clears their states; broken objects are repaired on start
 * (ipod86) fix: log messages of notifications are always English
