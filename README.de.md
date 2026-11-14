@@ -61,6 +61,7 @@ Die Anmeldung mit einem Proxmox-Konto über die Web-UI wird bewusst nicht unters
 | `summary.*` | Offene Sicherheits-/normale Updates gesamt, Targets mit Updates, nicht erreichbare Targets, Targets mit ausstehendem Neustart |
 | `targets.<Name>_<ID>.*` | Alle Felder, die der Ultimate Updater pro Host/LXC/VM liefert (z. B. `security_updates`, `normal_updates`, `reboot_required`, `reachable`, `last_check`) |
 | `targets.<…>.jobState`, `targets.<…>.jobUnit` | Status und ID des letzten Jobs dieses Targets (`none`, wenn es keinen gibt) |
+| `widget.data` | Alle Ziele und Jobs in einem JSON-Datenpunkt – liest die Web-Komponente |
 | `jobs.<Unit>.*` | Laufende und letzte Jobs; bei fehlgeschlagenen Jobs stehen die letzten Logzeilen in `log` |
 
 ### Buttons
