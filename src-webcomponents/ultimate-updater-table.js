@@ -584,7 +584,7 @@ class UltimateUpdaterTable extends IobWebComponent {
 		return `
 :host { display: block; width: 100%; height: 100%; overflow: auto; color: var(--iob-text, inherit); }
 * { box-sizing: border-box; }
-.uu-card { width: 100%; font-family: var(--iob-font-family, sans-serif); font-size: ${(14 * scale).toFixed(1)}px; line-height: 1.2; position: relative; }
+.uu-card { width: 100%; font-family: var(--iob-font-family, sans-serif); font-size: ${(16 * scale).toFixed(1)}px; line-height: 1.2; position: relative; }
 .uu-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
 .uu-summary { font-size: 0.85em; opacity: 0.8; }
 .uu-summary.busy { color: ${cWarn}; opacity: 1; }
