@@ -81,9 +81,9 @@ Nothing is ever updated or rebooted automatically – only when you press a butt
 
 **Collective updates run one target after the other:** Ultimate Updater answers as soon as a job has *started* (HTTP 202), so the adapter waits until the job of one target has finished before it starts the next one. Jobs started elsewhere (e.g. in the Web UI) are waited for as well. Progress is shown in `bulk.active` and `bulk.progress` (e.g. `3/7: web`, at the end e.g. `4 ok, 2 unchanged, 1 failed, 0 not started`; "unchanged" = job state `skipped`, there was nothing to update).
 
-### Widget for AURA and vis-2
+### Widget (web component) for AURA, vis-2 and other visualisations
 
-The adapter brings the web component **"Ultimate Updater table"**: all hosts, VMs and containers in one table with the open updates (security / other), reboot hint, job state and the buttons – the same as the states above, ready for the dashboard. It needs no script and no simple-api: the buttons write the button states directly through the connection of the visualisation.
+The adapter brings the widget **"Ultimate Updater table"** (a web component, usable in AURA, vis-2 and every other visualisation that supports web components): all hosts, VMs and containers in one table with the open updates (security / other), reboot hint, job state and the buttons – the same as the states above, ready for the dashboard. It needs no script and no simple-api: the buttons write the button states directly through the connection of the visualisation.
 
 ![Ultimate Updater table](https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/docs/widget_en.jpg)
 
@@ -95,7 +95,7 @@ The adapter brings the web component **"Ultimate Updater table"**: all hosts, VM
 - Settings: which buttons and systems are shown (hosts, switched off ones, only systems with updates), order, row height, text size, striped rows and the colours
 - New or deleted systems appear by themselves
 
-In AURA (0.106.0 or newer) the component is in the list of web components after the installation; set **"Clicks" of the widget to "component"**, otherwise the buttons get no clicks. vis-2 needs version 2.20.7 or newer.
+In AURA (0.106.0 or newer) the widget is in the widget list after the installation; set **"Clicks" of the widget to "component"**, otherwise the buttons get no clicks. vis-2 needs version 2.20.7 or newer.
 
 ### Notifications
 
@@ -127,7 +127,7 @@ The adapter uses the documented, versioned integration API v1 of Ultimate Update
 * (ipod86) fix: web component loads much faster and in one step (all targets and jobs in the new state `widget.data`); confirmation box no longer white in some themes
 
 ### 0.2.0 (2026-11-14)
-* (ipod86) feat: web component "Ultimate Updater table" for AURA and vis-2, optionally with CPU/RAM/disk from the proxmox adapter
+* (ipod86) feat: widget "Ultimate Updater table" (web component) for AURA, vis-2 and other visualisations, optionally with CPU/RAM/disk from the proxmox adapter
 
 ### 0.1.3 (2026-11-14)
 * (ipod86) fix: one notification per category and status refresh with all targets, instead of one per target – the notification manager sent the open ones again for every single notification (repeated Telegram messages)

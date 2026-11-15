@@ -81,9 +81,9 @@ Es wird nie automatisch aktualisiert oder neu gestartet – nur per Knopfdruck. 
 
 **Sammel-Updates laufen nacheinander:** Der Ultimate Updater antwortet, sobald ein Job *gestartet* ist (HTTP 202). Der Adapter wartet deshalb, bis der Job eines Targets beendet ist, bevor er das nächste startet. Auch auf anderswo gestartete Jobs (z. B. in der Web-UI) wird gewartet. Den Fortschritt zeigen `bulk.active` und `bulk.progress` (z. B. `3/7: web`, am Ende z. B. `4 ok, 2 unchanged, 1 failed, 0 not started`; "unchanged" = Jobstatus `skipped`, es gab nichts zu aktualisieren).
 
-### Widget für AURA und vis-2
+### Widget (Web-Komponente) für AURA, vis-2 und andere Visualisierungen
 
-Der Adapter bringt die Web-Komponente **„Ultimate-Updater-Tabelle“** mit: alle Hosts, VMs und Container in einer Tabelle mit den offenen Updates (Sicherheit / weitere), Neustart-Hinweis, Job-Status und den Knöpfen – dieselben Datenpunkte wie oben, fertig fürs Dashboard. Sie braucht kein Skript und keine simple-api: Die Knöpfe schreiben die Button-Datenpunkte direkt über die Verbindung der Visualisierung.
+Der Adapter bringt das Widget **„Ultimate-Updater-Tabelle“** mit (eine Web-Komponente, nutzbar in AURA, vis-2 und jeder anderen Visualisierung, die Web-Komponenten unterstützt): alle Hosts, VMs und Container in einer Tabelle mit den offenen Updates (Sicherheit / weitere), Neustart-Hinweis, Job-Status und den Knöpfen – dieselben Datenpunkte wie oben, fertig fürs Dashboard. Sie braucht kein Skript und keine simple-api: Die Knöpfe schreiben die Button-Datenpunkte direkt über die Verbindung der Visualisierung.
 
 ![Ultimate-Updater-Tabelle](https://raw.githubusercontent.com/ipod86/ioBroker.ultimate-updater/main/docs/widget_de.jpg)
 
@@ -95,7 +95,7 @@ Der Adapter bringt die Web-Komponente **„Ultimate-Updater-Tabelle“** mit: al
 - Einstellungen: welche Knöpfe und Systeme gezeigt werden (Hosts, ausgeschaltete, nur Systeme mit Updates), Reihenfolge, Zeilenhöhe, Textgröße, abwechselnd hinterlegte Zeilen und die Farben
 - Neue oder gelöschte Systeme erscheinen von selbst
 
-In AURA (ab 0.106.0) steht die Komponente nach der Installation in der Liste der Web-Komponenten; beim Widget **„Klicks“ auf „Komponente“ stellen**, sonst kommen die Knöpfe nicht an. vis-2 braucht Version 2.20.7 oder neuer.
+In AURA (ab 0.106.0) steht das Widget nach der Installation in der Widget-Liste; beim Widget **„Klicks“ auf „Komponente“ stellen**, sonst kommen die Knöpfe nicht an. vis-2 braucht Version 2.20.7 oder neuer.
 
 ### Benachrichtigungen
 
@@ -127,7 +127,7 @@ Der Adapter nutzt die dokumentierte, versionierte Integrations-API v1 von Ultima
 * (ipod86) fix: Web-Komponente lädt deutlich schneller und in einem Schritt (alle Ziele und Jobs im neuen Datenpunkt `widget.data`); Rückfrage-Box in manchen Themes nicht mehr weiß
 
 ### 0.2.0 (2026-11-14)
-* (ipod86) feat: Web-Komponente „Ultimate-Updater-Tabelle“ für AURA und vis-2, optional mit CPU/RAM/Festplatte aus dem proxmox-Adapter
+* (ipod86) feat: Widget „Ultimate-Updater-Tabelle“ (Web-Komponente) für AURA, vis-2 und andere Visualisierungen, optional mit CPU/RAM/Festplatte aus dem proxmox-Adapter
 
 ### 0.1.3 (2026-11-14)
 * (ipod86) fix: eine Benachrichtigung pro Kategorie und Statusabfrage mit allen Zielen statt einer pro Ziel – der Benachrichtigungs-Manager hat sonst bei jeder einzelnen Meldung die offenen erneut verschickt (doppelte Telegram-Nachrichten)
